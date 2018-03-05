@@ -1,0 +1,15 @@
+RewriteEngine On
+
+RewriteCond	%{REQUEST_FILENAME}	!-f
+RewriteCond	%{REQUEST_FILENAME}	!-d
+
+#untuk resource dokkap
+#RewriteRule ^dokkap/filterbydate/(.*)/(.*)$	index.php?model=dokkap&method=findbydate&param[]=$1&param[]=$2
+#RewriteRule ^dokkap/?$							index.php?model=dokkap&mode=REST 	[NC,L]
+
+
+#untuk resource user
+#RewriteRule ^user/list
+
+#default routing
+RewriteRule ^(.*)								index.php						[L,QSA]
