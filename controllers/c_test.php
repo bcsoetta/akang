@@ -40,5 +40,10 @@ class C_test extends Base_Controller{
 
 		print_r($data);
 	}
+
+	public function doSomething() {
+		// gotta do something here
+		echo "OH SHIEET";
+	}
 }
 ?>
