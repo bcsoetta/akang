@@ -64,6 +64,7 @@ if (isset($pemeriksa['stat_time']))
 		</h2>
 		<p>
 			<?php
+			// tampilkan waktu terakhir status
 			echo $waktu;
 			?>
 		</p>
