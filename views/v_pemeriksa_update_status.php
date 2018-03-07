@@ -70,8 +70,22 @@ if (isset($pemeriksa['stat_time']))
 		</p>
 		<hr>
 		<div>
-			<button data-url="<?php echo base_url('pemeriksa/update/status/available');?>" class="shAnim commonButton redGrad" <?php if($status == 'AVAILABLE' || is_null($status))echo 'disabled';?>>Siap ditugaskan kembali</button>
-			<button data-url="<?php echo base_url('pemeriksa/update/status/non-aktif');?>" class="shAnim commonButton greenGrad" <?php if($status == 'NON-AKTIF' || is_null($status))echo 'disabled';?> >Absen Pulang/Non-Aktif</button>
+			<button data-url="<?php echo base_url('pemeriksa/updatestatus/available');?>" class="shAnim commonButton redGrad" <?php if($status == 'AVAILABLE' || is_null($status))echo 'disabled';?>>Siap ditugaskan kembali</button>
+			<button data-url="<?php echo base_url('pemeriksa/updatestatus/non-aktif');?>" class="shAnim commonButton greenGrad" <?php if($status == 'NON-AKTIF' || is_null($status))echo 'disabled';?> >Absen Pulang/Non-Aktif</button>
 		</div>
 	</form>
 </div>
+
+<script type="text/javascript">
+$(function(argument) {
+	// when button is clicked
+	$('.commonButton').click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		// grab url
+		var url = $(this).data('url');
+		// alert(url);
+		window.location = url;
+	});
+});
+</script>

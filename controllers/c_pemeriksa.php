@@ -474,6 +474,87 @@ class C_pemeriksa extends Base_Controller {
 		echo json_encode($result);
 	}
 
-	
+	public function updatestatus($status) {
+		$this->user->forceLogin();
+
+		if (! ($this->user->hasRole(R_PEMERIKSA) || $this->user->hasRole(R_SUPERUSER)) )
+			return forbid();
+
+		// prepare query
+		$qstring = "INSERT INTO
+						status_pemeriksa (
+							user_id,
+							status,
+							lokasi
+						)
+					VALUES (
+						:uid,
+						:status,
+						:lokasi
+					);";
+
+		// prepare parameter
+		if ($status == 'available') {
+			$param = array(
+				':uid'	=> $this->user->getData()['id'],
+				':status'	=> 'AVAILABLE',
+				':lokasi'	=> 'BCSH'
+			);
+		} else if ($status == 'non-aktif') {
+			$param = array(
+				':uid'	=> $this->user->getData()['id'],
+				':status'	=> 'BUSY',
+				':lokasi'	=> 'BCSH'
+			);
+		} else {
+			// set data
+			$title = $this->app->getTitle() . ' - Update status';
+			$msg = 'Gagal mengupdate status...kontak Duknis plis';
+
+			// gunakan halaman redirection
+			$data = array(
+				'pagetitle' => $title,
+				'message' => $msg,
+				'seconds' => 3,
+				'targetName' => 'Halaman sebelumnya',
+				'target' => base_url('')
+				);
+
+			$this->load_view('message_redirect', $data, false);
+			die();
+		}
+
+		// // header('location: ' . base_url(''));
+		// print_r($param);
+
+		$statusData = array(
+			$this->user->getData()['id']	=> array('status' => strtoupper($status) )
+			);
+
+		$result = $this->pemeriksa->simpanStatusPemeriksa($statusData);
+
+		// now we redirect
+		if ($result) {
+			header('location: ' . base_url(''));	
+			// echo "Berhasilkah? " . $result;
+		} else {
+			// set data
+			$title = $this->app->getTitle() . ' - Update status';
+			$msg = 'Gagal mengupdate status ('.$this->pemeriksa->getLastError().')...kontak Duknis plis';
+
+			// gunakan halaman redirection
+			$data = array(
+				'pagetitle' => $title,
+				'message' => $msg,
+				'seconds' => 3,
+				'targetName' => 'Halaman sebelumnya',
+				'target' => base_url('')
+				);
+
+			$this->load_view('message_redirect', $data, false);
+			die();
+		}
+		
+	}
 }
 ?>
