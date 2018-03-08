@@ -104,11 +104,12 @@ class menu extends Base_Model {
 
 		// menu umum browse
 		// hanya utk PPJK, PJT, ADMIN, ADMIN_PABEAN, PEMERIKSA
-		if ($role & (R_PPJK|R_PJT|R_ADMIN_PABEAN|R_SUPERUSER)) {
+		if ($role & (R_PPJK|R_PJT|R_ADMIN_PABEAN|R_SUPERUSER|R_PEMERIKSA)) {
 			$mn_browse = $this->addMenuItem('Browse', null, 'normal', null);
 
 				// for browsing request. 
-				$mn_browse_request = $this->addMenuItem('Permohonan Pemeriksaan Fisik', $mn_browse, null, 'app/browse/request');
+				if ($role & (R_PPJK|R_PJT) )
+					$mn_browse_request = $this->addMenuItem('Permohonan Pemeriksaan Fisik', $mn_browse, null, 'app/browse/request');
 
 				// browse outstanding buat smua
 				if ($role & (R_SUPERUSER|R_ADMIN_PABEAN|R_PPJK|R_PJT)) {
@@ -119,6 +120,9 @@ class menu extends Base_Model {
 				// if ($role & (R_SUPERUSER|R_ADMIN_PABEAN|R_PPJK|R_PJT)) {
 				// 	$mn_browse_pemeriksa = $this->addMenuItem('Pemeriksa Aktif', $mn_browse, null, 'pemeriksa/aktif');
 				// }
+
+				// browse status by awb
+				$mn_browse_hawb = $this->addMenuItem('Berdasarkan AWB', $mn_browse, null, 'app/browse/awb');
 		}
 
 

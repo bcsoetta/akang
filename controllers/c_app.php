@@ -317,6 +317,56 @@ class C_app extends Base_Controller{
 		$this->load_view('index', $data);
 	}
 
+	// this page browse by awb
+	private function browseawb() {
+		// gotta make sure user's logged in
+		$this->user->forceLogin();
+
+		$data = array();
+		$data['pagetitle'] = $this->app->getTitle() . ' Browse Data per AWB';
+		$data['user'] = $this->user->getData();
+		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
+			$this->user->getData()['id'],
+			$this->user->getData()['role_code']
+			));		
+
+		// here be custom view
+		$browseData = array(
+			'adminMode'	=> false
+		);
+
+		// is it submitted?
+		if (isset($_GET['hawb'])) {
+			$browseData['hawb'] = stripslashes(trim($_GET['hawb']));
+			$browseData['result'] = $this->app->queryStatusAWB($browseData['hawb']);
+
+			if ($this->user->getData()['role_code'] & R_PEMERIKSA) {
+				// activate special menu and
+				// if last response is not finished, 
+				$respCount = count($browseData['result']['response']);
+
+				// is pemeriksa
+				$browseData['adminMode'] = true;
+
+				if ($respCount > 0) {
+					if ($browseData['result']['response'][$respCount-1]['status'] != 'FINISHED') {
+						$browseData['canFinish'] = true;
+
+						if ($browseData['result']['response'][$respCount-1]['status'] != 'OVERTIME')
+							$browseData['canOvertime'] = true;
+					}
+				}
+
+
+			}
+		}
+
+
+		$data['mainContent'] = $this->load_view('browse_awb', $browseData, true);
+
+		$this->load_view('index', $data);
+	}
+
 	// this page browse stuffs
 	function browse($data) {
 		if ($data == 'request') {
@@ -326,6 +376,9 @@ class C_app extends Base_Controller{
 		} else if ($data == 'outstanding') {
 			// browse for outstanding per gudang
 			$this->browseoutstanding();
+			die();
+		} else if ($data == 'awb') {
+			$this->browseawb();
 			die();
 		} else {
 			// shit, forbid it
@@ -347,9 +400,36 @@ class C_app extends Base_Controller{
 			return $this->queryoutstanding();
 		} else if ($data == 'activewarehouse') {
 			return $this->queryactivewarehouse();
+		} else if ($data == 'awb') {
+			return $this->queryawb();
 		}
 
 		return forbid();
+	}
+
+	// return data queried by awb
+	function queryawb() {
+		// grab parameter by GET
+		if (isset($_GET['hawb'])) {
+			// grab result
+			$input = trim($_GET['hawb']);
+
+			// dummy test
+			$data = array(
+					'result' => $this->app->queryListAWB($input),
+					'status' => 'success',
+					'queryString' => $input
+				);
+
+			// test
+			// sleep(1);
+
+			header('Access-Control-Allow-Origin: *');
+			header('Content-Type: application/json');
+			echo json_encode($data);
+		}
+
+		die();
 	}
 
 	function queryrequest() {

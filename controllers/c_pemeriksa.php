@@ -421,6 +421,9 @@ class C_pemeriksa extends Base_Controller {
 			case 'proses':
 				$flag = 'ON_PROCESS';
 				break;
+			case 'overtime':
+				$flag = 'OVERTIME';
+				break;
 			default:
 				$flag = '';
 				break;

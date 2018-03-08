@@ -885,6 +885,16 @@ input[readonly="true"] {
 	padding: 8px;
 }
 
+.spinner24 {
+	display: block;
+	background-image: url("../img/spinner_24.gif");
+	background-repeat: no-repeat;
+	background-position: center;
+
+	width: 24px;
+	height: 24px;
+}
+
 .spinner {
 	background-image: url("../img/spinner_loading.svg");
 	background-repeat: no-repeat;

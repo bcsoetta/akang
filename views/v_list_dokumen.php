@@ -109,7 +109,8 @@ if (!isset($role)) {
 			<td>0.5000</td>
 			<td>FEDX</td>
 			<td>
-				<button class="commonButton shAnim redGrad btnSelesai" data-url="<?php echo base_url('pemeriksa/flag/selesai');?>" data-dokumen="">Selesai</button>
+				<button class="commonButton shAnim blueGrad btnSelesai" data-url="<?php echo base_url('pemeriksa/flag/selesai');?>" data-dokumen="">Selesai</button>
+				<button class="commonButton shAnim redGrad btnSelesai" data-url="<?php echo base_url('pemeriksa/flag/overtime');?>" data-dokumen="">Overtime!</button>
 			</td>
 			<td>
 				<label class="pointable ifullblock">

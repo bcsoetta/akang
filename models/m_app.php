@@ -945,5 +945,97 @@ class app extends Base_Model {
 
 		return false;
 	}
+
+
+	// fungsi ini cm nyari hawb yang mirip-mirip
+	public function queryListAWB($input) {
+		$qstring = "SELECT
+						a.no_dok
+					FROM
+						batch_detail a
+					WHERE
+						a.no_dok LIKE :searchInput;";
+
+		try {
+			$stmt = $this->db->prepare($qstring);
+
+			$data = array(':searchInput' => '%'.$input.'%');
+
+			$res = $stmt->execute($data);
+
+			$rawData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			// grab all into one flat array
+			$retData = array();
+
+			foreach ($rawData as $row) {
+				$retData[] = $row['no_dok'];
+			}
+
+			return $retData;
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+		}
+
+		return false;
+	}
+
+	// fungsi ini mengkueri respon per awb
+	public function queryStatusAWB($hawb) {
+		$qstring = "SELECT
+						a.`status`,
+						DATE_FORMAT(a.time,'%d/%m/%Y %H:%i') time_formatted,
+						a.time,
+						a.user_id,
+						c.fullname,
+						a.dok_id,
+						b.importir
+					FROM
+						status_dok a
+						JOIN
+							batch_detail b 
+						ON 
+							a.dok_id = b.id
+						JOIN
+							user c
+						ON
+							a.user_id = c.id
+					WHERE
+						b.no_dok = :hawb
+					ORDER BY
+						a.time;";
+
+		try {
+			$stmt = $this->db->prepare($qstring);
+
+			$res = $stmt->execute(array(
+				'hawb'	=> $hawb
+			));
+
+			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			$retData = array(
+				'no_dok' => $hawb,
+				'response' => array(),
+			);
+
+			// fill dok_id
+			if (count($rows)) {
+				$retData['dok_id'] = $rows[0]['dok_id'];
+				$retData['consignee'] = $rows[0]['importir'];
+			}
+
+			foreach ($rows as $row) {
+				$retData['response'][] = $row;
+			}
+
+			return $retData;
+
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+		}
+
+		return false;
+	}
 }
 ?>
