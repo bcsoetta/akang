@@ -26,7 +26,7 @@
 				<th>Berat (kg)</th>
 
 				<?php
-				if ($doctype == 'PIB') {
+				if (/*$doctype == 'PIB'*/0) {
 				?>
 
 				<th>Foto Barang</th>
@@ -76,7 +76,7 @@
 					</td>
 
 				<?php
-				if ($doctype == 'PIB') {
+				if (/*$doctype == 'PIB'*/0) {
 				?>
 
 					<td>

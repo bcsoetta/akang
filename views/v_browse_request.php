@@ -30,8 +30,8 @@ if (!isset($dateend))
 
 			<span class="field">Jenis Pengajuan</span>
 			<select class="styled shAnim" name="doctype">
-				<!-- <option value="ALL" selected>Semua</option>
-				<option value="PIB">PIB</option> -->
+				<option value="ALL" selected>Semua</option>
+				<option value="PIB">PIB</option>
 				<option value="CN_PIBK">CN/PIBK</option>
 			</select>
 

@@ -56,7 +56,7 @@ $docTypeName = $docType == 'CN_PIBK' ? 'CN/PIBK' : 'PIB';
 						<th>Tonase (Kg)</th>
 
 						<?php
-						if ($docType == 'PIB') {
+						if (/*$docType == 'PIB'*/ 0) {
 						?>
 
 						<th>Foto Barang (Max 512Kb)</th>
@@ -92,7 +92,7 @@ $docTypeName = $docType == 'CN_PIBK' ? 'CN/PIBK' : 'PIB';
 			<td><input type="number" name="jml_item[]" step="1" min="0" class="shAnim"/></td>
 			<td><input type="number" name="berat_kg[]" step="any" min="0" class="shAnim"/></td>
 			<?php
-			if ($docType == 'PIB') {
+			if (/*$docType == 'PIB'*/0) {
 			?>
 
 			<td>
@@ -114,7 +114,7 @@ $docTypeName = $docType == 'CN_PIBK' ? 'CN/PIBK' : 'PIB';
 				<input type="button" class="shAnim commonButton redGrad" value="Delete" data-action="rowDelete"/>
 
 				<?php
-				if ($docType == 'PIB') {
+				if (/*$docType == 'PIB'*/0) {
 				?>
 
 				<input type="button" class="shAnim commonButton blueGrad" value="Clear Img" data-action="imgClear"/>

@@ -8,13 +8,15 @@ if (!isset($result))
 $canFinish = isset($canFinish) ? $canFinish : false;
 $canOvertime = isset($canOvertime) ? $canOvertime : false;
 $adminMode = isset($adminMode) ? $adminMode : false;
+
+
 ?>
 
 <div id="searchbox">
 	<form id="frmSearch" action="" method="GET">
-		<p>No. Barang Kiriman</p>
+		<p>No. Barang Kiriman / PIB</p>
 		<div>
-			<input type="text" name="hawb" class="si shAnim" value="<?php echo isset($hawb)?$hawb:''; ?>" placeholder="Masukkan no barang kiriman..." list="awbList" id="awbQuery">
+			<input type="text" name="hawb" class="si shAnim" value="<?php echo isset($hawb)?$hawb:''; ?>" placeholder="Masukkan no barang kiriman/PIB..." list="awbList" id="awbQuery">
 				<datalist id="awbList" data-src="<?php echo base_url('app/query/awb');?>" data-cache=""></datalist>
 			<input type="submit" value="Cari" class="shAnim commonButton blueGrad">
 		</div>
@@ -45,7 +47,13 @@ if (isset($hawb)) {
 	} else {
 ?>
 <p>
-	HAWB <?php echo $hawb . ' / ' . $result['consignee'];?>
+	<?php
+	if ($result['response'][0]['jenis_dok'] == 'PIB')
+		echo 'NO PIB ';
+	else
+		echo 'NO BRG KIRIMAN ';
+	?>
+	 <?php echo $hawb . ' / ' . $result['consignee'];?>
 </p>
 
 <table class="table">

@@ -158,28 +158,28 @@ class app extends Base_Model {
 			return false;
 		}
 
-		// instantiate image model
-		$image = new image;
+		// // instantiate image model
+		// $image = new image;
 
-		// list of inserted image so far
-		$imageInserted = array();
+		// // list of inserted image so far
+		// $imageInserted = array();
 
-		// pastiin gk ada yg dobel...
-		if (isset($img_name)) {
-			$i = 0;
+		// // pastiin gk ada yg dobel...
+		// if (isset($img_name)) {
+		// 	$i = 0;
 
-			for ($i=0; $i<count($img_name); $i++) {
-				$imgname = htmlentities(trim($img_name[$i]));
-				$imgsrc =$img_src[$i];
+		// 	for ($i=0; $i<count($img_name); $i++) {
+		// 		$imgname = htmlentities(trim($img_name[$i]));
+		// 		$imgsrc =$img_src[$i];
 
-				$fullName = image::$imgFolder . $image->getDatedFilename($imgname);
+		// 		$fullName = image::$imgFolder . $image->getDatedFilename($imgname);
 
-				if (file_exists($fullName)) {
-					$this->setLastError("Gambar [" . $img_name[$i] . "] udh pernah diupload!");
-					return false;
-				}
-			}
-		}
+		// 		if (file_exists($fullName)) {
+		// 			$this->setLastError("Gambar [" . $img_name[$i] . "] udh pernah diupload!");
+		// 			return false;
+		// 		}
+		// 	}
+		// }
 
 		$this->db->beginTransaction();
 
@@ -196,7 +196,7 @@ class app extends Base_Model {
 			// got header, next step
 
 			// prepared statements
-			$stmt_img = $image->dbtrPrepareImageInsert();
+			// $stmt_img = $image->dbtrPrepareImageInsert();
 			$stmt_detail = $this->dbtrPrepareDetailInsert();
 			
 			// loop over each element in succession
@@ -216,23 +216,23 @@ class app extends Base_Model {
 
 				$img_id = null;
 
-				// only do it if we have image sent
-				if (isset($img_name)) {
-					$img_name_cln = htmlentities(trim($img_name[$i]));
-					// insert image, then detail
-					$complete_name = $image->getDatedFilename($img_name_cln);
+				// // only do it if we have image sent
+				// if (isset($img_name)) {
+				// 	$img_name_cln = htmlentities(trim($img_name[$i]));
+				// 	// insert image, then detail
+				// 	$complete_name = $image->getDatedFilename($img_name_cln);
 
-					// inserted image record...
-					$imageInserted[] = image::$imgFolder . $complete_name;
+				// 	// inserted image record...
+				// 	$imageInserted[] = image::$imgFolder . $complete_name;
 
-					$img_id = $image->dbtrInsertImage($stmt_img, $image->getDatedFilename($img_name_cln), $img_src[$i]);
+				// 	$img_id = $image->dbtrInsertImage($stmt_img, $image->getDatedFilename($img_name_cln), $img_src[$i]);
 
-					if (!$img_id) {
-						// if image exists, delete it
-						throw new PDOException("Error on Image for dok ".$no_dok_cln." => " . $image->getLastError());
-						// $this->db->rollback();
-					}
-				}
+				// 	if (!$img_id) {
+				// 		// if image exists, delete it
+				// 		throw new PDOException("Error on Image for dok ".$no_dok_cln." => " . $image->getLastError());
+				// 		// $this->db->rollback();
+				// 	}
+				// }
 
 
 				// got img id, insert detail
@@ -255,11 +255,11 @@ class app extends Base_Model {
 
 			$msg = $e->getMessage();
 
-			// list gambar yg udh terlanjur keupload 
-			foreach ($imageInserted as $img) {
-				// $msg .= "\r\n" . $img;
-				unlink($img);
-			}
+			// // list gambar yg udh terlanjur keupload 
+			// foreach ($imageInserted as $img) {
+			// 	// $msg .= "\r\n" . $img;
+			// 	unlink($img);
+			// }
 
 			$this->setLastError($msg);
 
@@ -989,7 +989,8 @@ class app extends Base_Model {
 						a.user_id,
 						c.fullname,
 						a.dok_id,
-						b.importir
+						b.importir,
+						b.jenis_dok
 					FROM
 						status_dok a
 						JOIN

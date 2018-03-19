@@ -157,8 +157,10 @@ class C_app extends Base_Controller{
 			'no_pib'		=> $_POST['no_pib'],
 			'tgl_pib'		=> $_POST['tgl_pib'],
 			'importir'		=> $_POST['importir'],
-			'img_name'		=> $_POST['img_name'],
-			'img_src'		=> $_POST['img_src']
+			'jml_item'		=> $_POST['jml_item'],
+			'berat_kg'		=> $_POST['berat_kg']
+			// 'img_name'		=> $_POST['img_name'],
+			// 'img_src'		=> $_POST['img_src']
 			);
 			// echo json_encode($bulk);
 
@@ -170,9 +172,9 @@ class C_app extends Base_Controller{
 				$data['tgl_pib'],
 				$data['importir'],
 				$data['jml_item'],
-				$data['berat_kg'],
-				$data['img_name'],
-				$data['img_src']
+				$data['berat_kg']
+				// $data['img_name'],
+				// $data['img_src']
 				);
 
 			if ($result) {
