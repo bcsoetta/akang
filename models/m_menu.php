@@ -84,6 +84,10 @@ class menu extends Base_Model {
 		3 => array('title'=> 'Change Password', 'parentId'=>1, 'target'=> 'user/changepass/')
 	*/
 
+	/*
+	Fungsi ini adalah fungsi utama untuk menggenerate menu
+	*/
+
 	function generateMenuScheme($userId, $role) {
 		$this->clearMenu();
 
@@ -159,6 +163,7 @@ class menu extends Base_Model {
 			// $mn_penugasan = $this->addMenuItem('Penunjukkan Pemeriksa', $mn_admin_pabean, null, 'app/tunjukpemeriksa');
 			$mn_update_pemeriksa = $this->addMenuItem('Status Pemeriksa', $mn_admin_pabean, null, 'pemeriksa/status');
 			// $mn_laporan = $this->addMenuItem('Laporan Kegiatan', $mn_admin_pabean, null, 'app/report');
+			$mn_performa_pemeriksa = $this->addMenuItem('Performa Pemeriksa', $mn_admin_pabean, null, 'pemeriksa/performa');
 		}
 
 		// menu superuser

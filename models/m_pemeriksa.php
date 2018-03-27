@@ -28,6 +28,44 @@ class pemeriksa extends Base_Model {
 		return $this->lastError;
 	}
 
+	// fungsi ini ngembaliin list pemeriksa aktif/seluruhnya
+	public function getListPemeriksa($activeOnly = false) {
+		$qstring = "SELECT
+						a.id,
+						a.fullname
+					FROM
+						user a
+					WHERE
+						a.role = 'PEMERIKSA'
+						";
+		if ($activeOnly) {
+			$qstring .= "AND a.active = 'Y'";
+		}
+
+		try {
+			$stmt = $this->db->prepare($qstring);
+
+			$result = $stmt->execute(array());
+
+
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			$retData = array();
+
+			foreach ($data as $row) {
+				$retData[$row['id']] = $row['fullname'];
+			}
+
+			return $retData;
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+
+			return false;
+		}
+
+		return false;
+	}
+
 	// fungsi ini mengembalikan
 	public function getAbsenPemeriksa($tglAbsen) {
 		if (!isset($tglAbsen))
@@ -697,6 +735,86 @@ class pemeriksa extends Base_Model {
 			$this->setLastError($e->getMessage());
 		}
 
+		return false;
+	}
+
+	public function queryPerforma($dateStart, $dateEnd, $selectedId = -1) {
+
+		// where IN cannot use parameterized style
+		if ($selectedId == -1)
+			$whereInPemeriksa = "1";
+		else
+			if (is_array($selectedId)) {
+				if (count($selectedId))
+					$whereInPemeriksa = "a.id IN (" . implode(',', $selectedId) . ")";
+				else {
+					$this->setLastError("Pemeriksa kosong");
+					return false;
+				}
+			}
+
+		$qstring = "SELECT
+						a.id,
+						a.fullname,
+						IFNULL(DATE_FORMAT(src.tgl_periksa, '%d/%m/%Y'), '-') tgl_periksa,
+						IFNULL(src.gudang, '-') gudang,
+						IFNULL(src.total_periksa, '-') total_periksa,
+						IFNULL(src.jenis_dok, '-') jenis_dok
+					FROM
+						user a
+						LEFT JOIN 
+						(
+							SELECT
+								b.id, b.fullname, DATE(a.time) tgl_periksa, e.gudang, COUNT(*) total_periksa, d.jenis_dok
+							FROM
+								status_dok a
+								JOIN user b
+									ON a.user_id = b.id
+								JOIN batch_detail d
+									ON a.dok_id = d.id
+								JOIN batch_header e
+									ON d.batch_id = e.id
+							WHERE
+								a.`status` = 'FINISHED'
+								AND DATE(a.time) BETWEEN STR_TO_DATE(:datestart, '%d/%m/%Y') AND STR_TO_DATE(:dateend, '%d/%m/%Y')
+
+							GROUP BY
+								a.user_id, 
+								DATE(a.time), 
+								e.gudang,
+								d.jenis_dok
+							ORDER BY
+								DATE(a.time) DESC
+						) src
+						ON
+							a.id = src.id
+					WHERE
+						".
+						$whereInPemeriksa
+						."
+					ORDER BY
+						a.fullname ASC";
+
+		try {
+			$stmt = $this->db->prepare($qstring);
+
+			$result = $stmt->execute(array(
+				':datestart' 	=> $dateStart,
+				':dateend'		=> $dateEnd
+			));
+
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			$retData = array();
+			foreach ($data as $row) {
+				$retData[] = $row;
+			}
+
+			return $retData;
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+			return false;
+		}
 		return false;
 	}
 }
