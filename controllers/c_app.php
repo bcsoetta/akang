@@ -192,6 +192,10 @@ class C_app extends Base_Controller{
 			}
 
 		} else if ($doctype == 'CN_PIBK') {
+			if (!isset($_POST['lokasi'])) {
+				$_POST['lokasi'] = '';
+			}
+
 			$data = array(
 			'uploader_id'	=> $this->user->getData()['id'],
 			'gudang'		=> htmlentities(trim($_POST['lokasi'])),
@@ -212,7 +216,7 @@ class C_app extends Base_Controller{
 				$data['importir'],
 				$data['jml_item'],
 				$data['berat_kg']
-				);
+				) && ($data['gudang'] != '' );
 
 			if ($result) {
 				// echo "data CN/PIBK submitted with batch id #".$result;

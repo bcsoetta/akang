@@ -37,7 +37,10 @@ class app extends Base_Model {
 		if (strlen($gudang) < 3
 			|| strlen($uploader_id) < 1) {
 
-			$this->setLastError("App Error: Data header korup. Mau coba-coba ya?");
+			if (strlen($gudang) < 3)
+				$this->setLastError('App Error: Kode Gudang KOSONG!');
+			else
+				$this->setLastError("App Error: Data header korup. Identitas pengupload tidak valid. Mau coba-coba ya?");
 			return false;
 		}
 
