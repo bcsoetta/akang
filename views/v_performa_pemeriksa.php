@@ -119,7 +119,18 @@
 
 				<td><?php echo $row['tgl_periksa'];?></td>
 				<td><?php echo $row['gudang'];?></td>
-				<td><?php echo $row['total_periksa'];?></td>
+				<td>
+					<?php
+					if ($row['gudang'] != '-') {
+					?>
+					<a target="_blank" href="<?php if($row['gudang'] != '-') echo base_url("pemeriksa/record/$row[id]/$row[tgl_periksa_raw]/$row[gudang]/$row[jenis_dok]/$row[fullname]"); else echo "javascript:void(0);"?>"> <?php echo $row['total_periksa'];?> </a>
+					<?php
+					} else {
+						echo $row['total_periksa'];
+					}
+					?>
+
+				</td>
 				<td><?php echo $row['jenis_dok'];?></td>
 			</tr>
 

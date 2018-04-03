@@ -620,5 +620,30 @@ class C_pemeriksa extends Base_Controller {
 		$data['mainContent'] = $this->load_view('performa_pemeriksa', $performData, true);
 		$this->load_view('index', $data);
 	}
+
+	// untuk melihat record list dokumen yang diperiksa
+	public function record($pemId, $tglPeriksa, $gudang, $doctype, $namaPemeriksa) {
+		$this->user->forceLogin();
+
+		$data = array();
+		$data['pagetitle'] = $this->app->getTitle().' (Record ' . $namaPemeriksa . '@' . $tglPeriksa . '@' . $gudang . ')';
+		$data['user'] = $this->user->getData();
+		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
+			$this->user->getData()['id'],
+			$this->user->getData()['role_code']
+			));
+
+		$recordData = array(
+			'data' => $this->pemeriksa->queryRecordPemeriksaan($pemId, $tglPeriksa, $gudang, $doctype),
+			'fullname' => $namaPemeriksa,
+			'doctype' => $doctype,
+			'tglPeriksa' => $tglPeriksa,
+			'gudang' => $gudang
+		);
+
+		$data['mainContent'] = $this->load_view('record_pemeriksa', $recordData, true);
+
+		$this->load_view('index', $data);
+	}
 }
 ?>

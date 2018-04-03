@@ -757,6 +757,7 @@ class pemeriksa extends Base_Model {
 						a.id,
 						a.fullname,
 						IFNULL(DATE_FORMAT(src.tgl_periksa, '%d/%m/%Y'), '-') tgl_periksa,
+						IFNULL(src.tgl_periksa, '-') tgl_periksa_raw,
 						IFNULL(src.gudang, '-') gudang,
 						IFNULL(src.total_periksa, '-') total_periksa,
 						IFNULL(src.jenis_dok, '-') jenis_dok
@@ -815,6 +816,54 @@ class pemeriksa extends Base_Model {
 			$this->setLastError($e->getMessage());
 			return false;
 		}
+		return false;
+	}
+
+	// fungsi ini ngambil seluruh dokumen yg pernah diperiksa oleh pemeriksa
+	public function queryRecordPemeriksaan($pemId, $tglPeriksa, $gudang, $doctype) {
+		$qstring = "SELECT
+						b.no_dok,
+						b.tgl_dok,
+						b.importir,
+						b.jml_item,
+						b.berat_kg
+					FROM
+						status_dok a
+						JOIN batch_detail b
+							ON a.dok_id = b.id
+						JOIN batch_header c
+							ON b.batch_id = c.id		
+					WHERE
+						a.`status` = 'FINISHED'
+						AND DATE(a.time) = :tglPeriksa
+						AND a.user_id = :pemId
+						AND c.gudang = :gudang
+						AND b.jenis_dok = :doctype
+					GROUP BY
+						b.id";
+
+		try {
+			$stmt = $this->db->prepare($qstring);
+
+			$stmt->execute(array(
+				':tglPeriksa'	=> $tglPeriksa,
+				':pemId'		=> $pemId,
+				':gudang'		=> $gudang,
+				':doctype'		=> $doctype
+			));
+
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			$ret = array();
+			foreach ($data as $row) {
+				$ret[] = $row;
+			}
+
+			return $ret;
+		} catch (PDOException $e) {
+			
+		}
+
 		return false;
 	}
 }
