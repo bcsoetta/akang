@@ -23,7 +23,7 @@ class C_app extends Base_Controller{
 		}
 
 		$data = array();
-		$data['pagetitle'] = $this->app->getTitle().' (Request Pemeriksaan Fisik '. ($doctype == 'CN_PIBK' ? 'CN/PIBK' : 'PIB') .')';
+		$data['pagetitle'] = $this->app->getTitle().' (Request Pemeriksaan Fisik '. ($doctype == 'CN_PIBK' ? 'CN/PIBK' : 'CARNET') .')';
 		$data['user'] = $this->user->getData();
 		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
 			$this->user->getData()['id'],
@@ -149,7 +149,7 @@ class C_app extends Base_Controller{
 		}
 
 		// header('Content-Type: application/json');
-		if ($doctype == 'PIB') {
+		if ($doctype == 'CARNET') {
 			$data = array(
 			'uploader_id'	=> $this->user->getData()['id'],
 			'gudang'		=> htmlentities(trim($_POST['lokasi'])),
@@ -182,12 +182,12 @@ class C_app extends Base_Controller{
 
 				$returnData['success'] = true;
 				$returnData['error'] = '';
-				$returnData['msg'] = "data PIB submitted with batch id #".$result;
+				$returnData['msg'] = "data CARNET submitted with batch id #".$result;
 				$returnData['redirect'] = base_url('app/viewbatch/'.$result);
 			} else {
 				// echo ;
 				$returnData['success'] = false;
-				$returnData['error'] = "PIB request failed. reason: " . $this->app->getLastError();
+				$returnData['error'] = "CARNET request failed. reason: " . $this->app->getLastError();
 				$returnData['msg'] = '';
 			}
 
@@ -230,7 +230,7 @@ class C_app extends Base_Controller{
 				$returnData['error'] = "CN/PIBK request failed. reason: " . $this->app->getLastError();
 				$returnData['msg'] = '';
 			}
-		}
+		} 
 
 		
 
@@ -502,6 +502,9 @@ class C_app extends Base_Controller{
 
 				if (isset($dataGudang['gudang'][$gudang]['CN_PIBK']))
 					$value['CN_PIBK']['pemeriksa_aktif'] = count($dataGudang['gudang'][$gudang]['CN_PIBK']);				
+
+				if (isset($dataGudang['gudang'][$gudang]['CARNET']))
+					$value['CARNET']['pemeriksa_aktif'] = count($dataGudang['gudang'][$gudang]['CARNET']);
 			}
 
 			echo json_encode($data);

@@ -904,19 +904,21 @@ class app extends Base_Model {
 	//	$userid : id user yg ngeflag
 	//	$flag : flag {'FINISHED', 'CANCELED', 'ON_PROCESS'}
 	//	$ids : array berisi id dokumen yg mau diflag
-	public function flagDokumen($userid, $flag, $ids) {
+	public function flagDokumen($userid, $flag, $ids, $catatan) {
 		$qstring = "
 			INSERT INTO
 				status_dok(
 					dok_id,
 					status,
-					user_id
+					user_id,
+					catatan
 				)
 			VALUES
 				(
 					:docid,
 					:flag,
-					:userid
+					:userid,
+					:catatan
 				)
 			";
 
@@ -929,7 +931,8 @@ class app extends Base_Model {
 				$param = array(
 					':docid' => $docid,
 					':flag' => $flag,
-					':userid' => $userid
+					':userid' => $userid,
+					':catatan' => $catatan
 					);
 
 				$result = $stmt->execute($param);
@@ -993,7 +996,8 @@ class app extends Base_Model {
 						c.fullname,
 						a.dok_id,
 						b.importir,
-						b.jenis_dok
+						b.jenis_dok,
+						a.catatan
 					FROM
 						status_dok a
 						JOIN

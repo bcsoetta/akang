@@ -38,7 +38,6 @@
 		</p>
 	</form>
 </div>
-
 <div id="searchResult">
 	<!-- <p>
 		<?php
@@ -54,6 +53,7 @@
 	if ($searchResult && count($searchResult)) {
 
 		$skipRow = array();
+		$skipRowDoc = array();
 		$skipped = array();
 
 		// process each row data
@@ -62,6 +62,12 @@
 				$skipRow[$row['id']]++;
 			else
 				$skipRow[$row['id']] = 1;
+
+			if (isset($skipRowDoc[$row['id'] . '-' . $row['jenis_dok']])) {
+				$skipRowDoc[$row['id'] . '-' . $row['jenis_dok']]++;
+			} else {
+				$skipRowDoc[$row['id'] . '-' . $row['jenis_dok']] = 1;				
+			}
 
 			$skipped[$row['id']] = 0;
 		}
@@ -76,15 +82,21 @@
 				<th>Nama Pemeriksa</th>
 				<th>Tanggal Periksa</th>
 				<th>Gudang</th>
-				<th>Total Periksa</th>
+				<th>Total Per Gudang</th>
 				<th>Jenis Dok</th>
+				<!-- <th>Jenis Dok</th> -->
+				<th>Total Semua</th>
 			</tr>
 		</thead>
 		<tbody>
 
 			<?php
 			$nomor = 1;
+			$totalDok = 0;
+			$subTotalDokPerDok = 0;
+			$subTotalDok = 0;
 			foreach ($searchResult as $row) {
+				
 				$spawnRow = false;
 				if ($skipRow[$row['id']] > 1 && $skipped[$row['id']]++ == 0 || $skipRow[$row['id']] == 1)
 					$spawnRow = true;
@@ -95,6 +107,7 @@
 				<?php
 				// cuma utk kolom yg bsa rowspan
 				if ($spawnRow) {
+
 					if ($nomor % 2)
 						$className = "spannerOdd";
 					else
@@ -121,9 +134,12 @@
 				<td><?php echo $row['gudang'];?></td>
 				<td>
 					<?php
+					
 					if ($row['gudang'] != '-') {
+						$totalDok += $row['total_periksa'];
+						$subTotalDok += $row['total_periksa'];
 					?>
-					<a target="_blank" href="<?php if($row['gudang'] != '-') echo base_url("pemeriksa/record/$row[id]/$row[tgl_periksa_raw]/$row[gudang]/$row[jenis_dok]/$row[fullname]"); else echo "javascript:void(0);"?>"> <?php echo $row['total_periksa'];?> </a>
+					<a target="_blank" class="summable<?php echo $nomor-1;?>" href="<?php if($row['gudang'] != '-') echo base_url("pemeriksa/record/$row[id]/$row[tgl_periksa_raw]/$row[gudang]/$row[jenis_dok]/$row[fullname]"); else echo "javascript:void(0);"?>"> <?php echo $row['total_periksa'];?> </a>
 					<?php
 					} else {
 						echo $row['total_periksa'];
@@ -131,13 +147,31 @@
 					?>
 
 				</td>
-				<td><?php echo $row['jenis_dok'];?></td>
+
+				<td data-skip="<?php echo $skipRowDoc[$row['id'] . '-' . $row['jenis_dok']];?>"><?php echo $row['jenis_dok']; ?></td>
+				
+				<?php
+				if ($spawnRow) {
+					// $rowId = 0;
+				?>
+
+				<td class="<?php echo $className; ?> subtotal" rowspan="<?php echo $skipRow[$row['id']];?>">
+					-
+				</td>
+
+				<?php
+				}
+				?>
 			</tr>
 
 			<?php
 			}
 			?>
-			
+
+			<tr>
+				<td colspan="6"><strong>TOTAL</strong></td>
+				<td><?php echo $totalDok; ?></td>
+			</tr>			
 			
 		</tbody>
 	</table>	
@@ -201,6 +235,16 @@ $(function() {
 		}
 
 		return true;
+	});
+
+	// auto sum
+	$.each($('.subtotal'), function(k, v) {
+		var sum = 0;
+		$.each( $('.summable'+(k+1)), function(kk, vv){
+			sum += parseInt($(vv).text());
+		} );
+
+		$(v).text(sum);
 	});
 });
 </script>

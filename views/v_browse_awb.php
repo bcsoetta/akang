@@ -14,7 +14,7 @@ $adminMode = isset($adminMode) ? $adminMode : false;
 
 <div id="searchbox">
 	<form id="frmSearch" action="" method="GET">
-		<p>No. Barang Kiriman / PIB</p>
+		<p>No. Barang Kiriman / CARNET</p>
 		<div>
 			<input type="text" name="hawb" class="si shAnim" value="<?php echo isset($hawb)?$hawb:''; ?>" placeholder="Masukkan no barang kiriman/PIB..." list="awbList" id="awbQuery">
 				<datalist id="awbList" data-src="<?php echo base_url('app/query/awb');?>" data-cache=""></datalist>
@@ -48,8 +48,8 @@ if (isset($hawb)) {
 ?>
 <p>
 	<?php
-	if ($result['response'][0]['jenis_dok'] == 'PIB')
-		echo 'NO PIB ';
+	if ($result['response'][0]['jenis_dok'] == 'CARNET')
+		echo 'NO CARNET ';
 	else
 		echo 'NO BRG KIRIMAN ';
 	?>
@@ -61,6 +61,7 @@ if (isset($hawb)) {
 		<th>Status</th>
 		<th>Waktu</th>
 		<th>Operator</th>
+		<th>Catatan</th>
 	</thead>
 	<tbody>
 		<?php
@@ -72,6 +73,7 @@ if (isset($hawb)) {
 			<td><?php echo $resp['status'] ?></td>
 			<td><?php echo $resp['time_formatted'] ?></td>
 			<td><?php echo $resp['fullname'] ?></td>
+			<td><?php echo $resp['catatan'] ?></td>
 		</tr>
 
 		<?php

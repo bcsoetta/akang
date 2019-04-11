@@ -20,7 +20,7 @@ if (!isset($tglAbsen))
 				</tr>
 				<tr>
 					<th style="width: 10%;">
-						<label class="pointable ifullblock">PIB
+						<label class="pointable ifullblock">CARNET
 						<!-- <input type="checkbox" id="cbPIB" /> -->
 						</label>
 					</th>
@@ -75,13 +75,13 @@ function clearTable() {
 	$('#tblPemeriksa tbody tr').remove();
 }
 // nambah entry di tabel
-function addRow(userid, fullname, as_pib, as_cnpibk) {
+function addRow(userid, fullname, as_carnet, as_cnpibk) {
 	var rowCount = $('#tblPemeriksa tbody tr').length;
 
 	var row = "<tr>"
 			+ "<td>" + (rowCount+1) + '<input type="hidden" name="pemeriksa['+ userid +'][role]" />' + "</td>"
 			+ "<td>" + fullname + "</td>"
-			+ "<td>" + '<input type="checkbox" class="pointable ifullblock" value="PIB" name="pemeriksa[' + userid +'][role][]" ' + (as_pib?'checked':'') +'/>' + "</td>"
+			+ "<td>" + '<input type="checkbox" class="pointable ifullblock" value="CARNET" name="pemeriksa[' + userid +'][role][]" ' + (as_carnet?'checked':'') +'/>' + "</td>"
 			+ "<td>" + '<input type="checkbox" class="pointable ifullblock" value="CN_PIBK" name="pemeriksa[' + userid +'][role][]" ' + (as_cnpibk?'checked':'') + '/>' + "</td>"
 			+ "</tr>";
 
@@ -106,7 +106,7 @@ $(function() {
 			clearTable();
 
 			for (var i=0; i<data.pemeriksa.length; i++) {
-				addRow(data.pemeriksa[i].id, data.pemeriksa[i].fullname, data.pemeriksa[i].as_pib, data.pemeriksa[i].as_cnpibk);
+				addRow(data.pemeriksa[i].id, data.pemeriksa[i].fullname, data.pemeriksa[i].as_carnet, data.pemeriksa[i].as_cnpibk);
 			}
 
 			// fix date?

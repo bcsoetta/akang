@@ -5,7 +5,8 @@ class pemeriksa extends Base_Model {
 	// static public member
 	const ROLE_PIB = 1;
 	const ROLE_CNPIBK = 2;
-	const ROLE_ALL = self::ROLE_PIB|self::ROLE_CNPIBK;
+	const ROLE_CARNET = 4;
+	const ROLE_ALL = self::ROLE_PIB|self::ROLE_CNPIBK|self::ROLE_CARNET;
 
 	const STATUS_AVAILABLE = 1;
 	const STATUS_BUSY = 2;
@@ -114,6 +115,7 @@ class pemeriksa extends Base_Model {
 				// check some shit
 				$as_pib = false;
 				$as_cnpibk = false;
+				$as_carnet = false;
 
 				if (isset($status)) {
 					if (strlen($status) > 0) {
@@ -127,6 +129,10 @@ class pemeriksa extends Base_Model {
 						if (in_array('CN_PIBK', $stat)) {
 							$as_cnpibk = true;
 						}	
+
+						if (in_array('CARNET', $stat)) {
+							$as_carnet = true;
+						}	
 					}
 				}
 
@@ -135,7 +141,8 @@ class pemeriksa extends Base_Model {
 					'id' => $userid,
 					'fullname' => $fullname,
 					'as_pib' => $as_pib,
-					'as_cnpibk' => $as_cnpibk
+					'as_cnpibk' => $as_cnpibk,
+					'as_carnet' => $as_carnet
 					);
 			}
 
@@ -607,6 +614,9 @@ class pemeriksa extends Base_Model {
 
 				if ( in_array('CN_PIBK', $retData['pemeriksa'][$id]['role']) )
 					$retData['gudang'][$lokasi]['CN_PIBK'][] = $id;
+
+				if ( in_array('CARNET', $retData['pemeriksa'][$id]['role']) )
+					$retData['gudang'][$lokasi]['CARNET'][] = $id;
 			}
 			return $retData;
 		} catch (PDOException $e) {

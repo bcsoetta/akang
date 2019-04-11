@@ -1,6 +1,6 @@
 <?php
 $locked = isset($locked) ? $locked : false;
-$docTypeName = $docType == 'CN_PIBK' ? 'CN/PIBK' : 'PIB';
+$docTypeName = $docType == 'CN_PIBK' ? 'CN/PIBK' : 'CARNET';
 ?>
 
 <div>

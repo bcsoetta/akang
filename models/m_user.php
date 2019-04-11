@@ -10,6 +10,7 @@ define('R_PPJK', 2);
 define('R_ADMIN_PABEAN', 4);
 define('R_SUPERUSER', 8);
 define('R_PEMERIKSA', 16);
+define('R_CARNET_HANDLER', 32);	// Currently unused
 
 // Settingan session user
 define('USER_SESSION', 60*30);

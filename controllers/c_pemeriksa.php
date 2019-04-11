@@ -210,7 +210,7 @@ class C_pemeriksa extends Base_Controller {
 		// echo $role;
 
 		// aman, lanjut
-		$roleCode = ($role == 'PIB' ? pemeriksa::ROLE_PIB : ($role == 'CN_PIBK' ? pemeriksa::ROLE_CNPIBK : pemeriksa::ROLE_ALL) );
+		$roleCode = ($role == 'CARNET' ? pemeriksa::ROLE_CARNET : ($role == 'CN_PIBK' ? pemeriksa::ROLE_CNPIBK : pemeriksa::ROLE_ALL) );
 
 		$data = $this->pemeriksa->getPemeriksa($roleCode, pemeriksa::STATUS_AVAILABLE);
 
@@ -403,13 +403,19 @@ class C_pemeriksa extends Base_Controller {
 	// buat ngeflag dokumen selesai
 	//	$status : {SELESAI, BATAL, ON_PROCESS}
 	//	$id : {id dokumen, atau kosongin tp set $_POST['dokumen'] ke array berisi list dokumen}
-	public function flag($status, $id) {
+	public function flag($status, $id, $catatan) {
 		$this->user->forceLogin();
 
 		if (! ($this->user->hasRole(R_PEMERIKSA) || $this->user->hasRole(R_SUPERUSER)) )
 			return forbid();
 
 		$flag = '';
+
+		// mungkin via post
+		if (isset($_POST['status']))
+			$status = $_POST['status'];
+		else if (isset($_GET['status']))
+			$status = $_GET['status'];
 
 		switch ($status) {
 			case 'selesai':
@@ -424,6 +430,9 @@ class C_pemeriksa extends Base_Controller {
 			case 'overtime':
 				$flag = 'OVERTIME';
 				break;
+			case 'tidaksesuai':
+				$flag = 'INCONSISTENT';
+				break;
 			default:
 				$flag = '';
 				break;
@@ -431,7 +440,8 @@ class C_pemeriksa extends Base_Controller {
 
 		$execData = array(
 			'userid'	=> $this->user->getData()['id'],
-			'flag'		=> $flag
+			'flag'		=> $flag,
+			'catatan'	=> ''
 			);
 
 		// ambil id
@@ -456,11 +466,19 @@ class C_pemeriksa extends Base_Controller {
 			$execData['docid']	= $ids;
 		}
 
+		// mungkin ada catatan
+		if (isset($catatan))
+			$execData['catatan'] = urldecode($catatan);
+		else if (isset($_POST['catatan']))
+			$execData['catatan'] = urldecode($_POST['catatan']);
+		else if (isset($_GET['catatan']))
+			$execData['catatan'] = urldecode($_GET['catatan']);
 
 		$result = $this->app->flagDokumen(
 			$execData['userid'],
 			$execData['flag'],
-			$execData['docid']
+			$execData['docid'],
+			$execData['catatan']
 			);
 
 		// Cors header

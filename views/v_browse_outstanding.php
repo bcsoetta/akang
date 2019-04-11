@@ -44,7 +44,7 @@ if (!isset($isAuthorized))
 			<tr>
 				<th rowspan="2" style="vertical-align: middle;" class="blackish">No.</th>
 				<th rowspan="2" style="vertical-align: middle;" class="blackish">Gudang</th>
-				<th colspan="3">PIB</th>
+				<th colspan="3">CARNET</th>
 				
 				<th colspan="3" class="bluish">CN/PIBK</th>
 
@@ -125,7 +125,7 @@ if ($isAuthorized) {
 
 	<form id="frmPenugasanPemeriksa" action="<?php echo base_url('pemeriksa/penugasan');?>">
 		<div class="bottombox">
-			<button class="shAnim commonButton blueGrad btnKirimPemeriksa" data-type="PIB" data-url="<?php echo base_url('pemeriksa/available/PIB');?>">Kirim Pemeriksa PIB</button>
+			<button class="shAnim commonButton blueGrad btnKirimPemeriksa" data-type="CARNET" data-url="<?php echo base_url('pemeriksa/available/CARNET');?>">Kirim Pemeriksa CARNET</button>
 			<button class="shAnim commonButton redGrad btnKirimPemeriksa" data-type="CN/PIBK" data-url="<?php echo base_url('pemeriksa/available/CN_PIBK');?>">Kirim Pemeriksa CN/PIBK</button>
 		</div>
 
@@ -149,7 +149,7 @@ if ($isAuthorized) {
 <div class="floatForm" id="dlgPemeriksa">
 	<form action="<?php echo base_url('pemeriksa/penugasan');?>" method="POST" id="frmKirimPemeriksa">
 		<p>
-			<span class="fc1">Kirim Pemeriksa <span id="spPemeriksa">PIB</span> Ke :</span>
+			<span class="fc1">Kirim Pemeriksa <span id="spPemeriksa">CARNET</span> Ke :</span>
 
 			<span class="fc2"><input type="text" class="shAnim fullsize" readonly name="lokasi" id="lokasiPenugasan"/></span>
 		</p>
@@ -351,33 +351,43 @@ if ($isAuthorized) {
 		for (gudang in data.gudang) {
 			// yg pib
 			// console.log('PIB');
-			for (var i=0; i<data.gudang[gudang].PIB.length; i++) {
-				var idPemeriksa = data.gudang[gudang].PIB[i];
 
-				// console.log(gudang + ' -> ' +idPemeriksa);
+			// overridden for carnet
+			if (typeof data.gudang[gudang].CARNET != 'undefined') {
+				for (var i=0; i<data.gudang[gudang].CARNET.length; i++) {
+					var idPemeriksa = data.gudang[gudang].CARNET[i];
 
-				var li = '<li>' + data.pemeriksa[idPemeriksa].fullname + ' @ ' + data.pemeriksa[idPemeriksa].stat_time + '</li>';
+					// console.log(gudang + ' -> ' +idPemeriksa);
 
-				var list = $('.pemPIB.'+gudang);
-				// console.log(list);
+					var li = '<li>' + data.pemeriksa[idPemeriksa].fullname + ' @ ' + data.pemeriksa[idPemeriksa].stat_time + '</li>';
 
-				$('.pemPIB.'+gudang).append(li);
+					var list = $('.pemPIB.'+gudang);
+					// console.log(list);
+
+					$('.pemPIB.'+gudang).append(li);
+				}
 			}
+
+			
 
 			// yg cn/pibk
 			// console.log('CNPIBK');
-			for (var i=0; i<data.gudang[gudang].CN_PIBK.length; i++) {
-				var idPemeriksa = data.gudang[gudang].CN_PIBK[i];
+			if (typeof data.gudang[gudang].CN_PIBK != 'undefined') {
+				for (var i=0; i<data.gudang[gudang].CN_PIBK.length; i++) {
+					var idPemeriksa = data.gudang[gudang].CN_PIBK[i];
 
-				// console.log(gudang + ' -> ' +idPemeriksa);
+					// console.log(gudang + ' -> ' +idPemeriksa);
 
-				var li = '<li>' + data.pemeriksa[idPemeriksa].fullname + ' @ ' + data.pemeriksa[idPemeriksa].stat_time + '</li>';
+					var li = '<li>' + data.pemeriksa[idPemeriksa].fullname + ' @ ' + data.pemeriksa[idPemeriksa].stat_time + '</li>';
 
-				var list = $('.pemCNPIBK.'+gudang);
-				// console.log(list);
+					var list = $('.pemCNPIBK.'+gudang);
+					// console.log(list);
 
-				$('.pemCNPIBK.'+gudang).append(li);
+					$('.pemCNPIBK.'+gudang).append(li);
+				}
 			}
+			
+			
 		}
 	}
 
@@ -458,17 +468,17 @@ $(function() {
 					var pemPIB = 0;
 					var pemCNPIBK = 0;
 
-					if (typeof data[gudang]['PIB'] !== 'undefined') {
+					if (typeof data[gudang]['CARNET'] !== 'undefined') {
 						
 
-						if (typeof data[gudang]['PIB']['ON_PROCESS'] !== 'undefined') {
-							outPIB 	= data[gudang]['PIB']['ON_PROCESS']['total'];
-							oldestPIB 	= data[gudang]['PIB']['ON_PROCESS']['oldest_formatted'] 
-										+ ' (' + data[gudang]['PIB']['ON_PROCESS']['oldest_age'] +' hari)' ;
+						if (typeof data[gudang]['CARNET']['ON_PROCESS'] !== 'undefined') {
+							outPIB 	= data[gudang]['CARNET']['ON_PROCESS']['total'];
+							oldestPIB 	= data[gudang]['CARNET']['ON_PROCESS']['oldest_formatted'] 
+										+ ' (' + data[gudang]['CARNET']['ON_PROCESS']['oldest_age'] +' hari)' ;
 
 							totalOutPIB += outPIB;
 						}
-						pemPIB 	= data[gudang]['PIB']['pemeriksa_aktif'];
+						pemPIB 	= data[gudang]['CARNET']['pemeriksa_aktif'];
 
 						// save total
 						

@@ -14,9 +14,14 @@ if (!isset($role)) {
 	</h2>
 	<p>
 		<label class="pointable">
+			<input type="radio" id="rbCARNET" name="doctype" value="CARNET" class="pointable baseline" <?php if(!in_array('CARNET', $role))echo 'disabled'; ?>/>	
+			CARNET
+		</label>
+
+		<!-- <label class="pointable">
 			<input type="radio" id="rbPIB" name="doctype" value="PIB" class="pointable baseline" <?php if(!in_array('PIB', $role))echo 'disabled'; ?>/>
 			PIB	
-		</label>
+		</label> -->
 		
 		<label class="pointable">
 			<input type="radio" id="rbCNPIBK" name="doctype" value="CN_PIBK" class="pointable baseline" <?php if(!in_array('CN_PIBK', $role))echo 'disabled'; ?>/>	
@@ -62,11 +67,11 @@ if (!isset($role)) {
 					<th>Berat (Kg)</th>
 					<th>Lokasi</th>
 					<th>Aksi</th>
-					<th>
+					<!-- <th>
 						<label class="pointable ifullblock">
 							<input id="selAllDok" type="checkbox" class="pointable ifullblock" value="21" />
 						</label>
-					</th>
+					</th> -->
 				</tr>
 			</thead>
 			<tbody>
@@ -87,13 +92,38 @@ if (!isset($role)) {
 					</td>
 				</tr> -->
 			</tbody>
+
+			
 		</table>
 		
-		<hr>
+		<!-- <hr>
 
 		<div>
 			<button class="commonButton shAnim redGrad" id="btnSelesaikan">Selesaikan</button>
+		</div> -->
+
+		
+		<div id="dlgKeputusan" class="keputusan graybox" style="display:none;">
+			<button class="commonButton shAnim greenGrad btnSelesai" data-url="<?php echo base_url('pemeriksa/flag/selesai');?>" >Sesuai</button>
+			<a href="javascript:void(0)" class="commonButton shAnim redGrad btnPopupCatatan"  >Tidak Sesuai</a>
+
+			<a href="javascript:void(0)" class="commonButton yellowGrad" id="closeDlgKeputusan" onclick="closeDlgKeputusan()">Tutup</a>
 		</div>
+
+
+		<div id="dlgCatatanPemeriksa" class="floatForm graybox" style="display:none;">
+			<h2>Catatan</h2>
+			<p>
+				<textarea id="txtCatatan" style="width:100%;" rows="8"></textarea>	
+			</p>
+			<div class="bottombox">
+				<a href="javascript:void(0)" class="commonButton shAnim blueGrad" id="btnSimpanCatatan">Simpan</a>
+				<a href="javascript:void(0)" class="commonButton shAnim redGrad" onclick="closeDlgCatatan()">Batal</a>		
+
+				<button class="btnSelesai" style="display: none;" id="btnDummy" data-url="<?php echo base_url('pemeriksa/flag/tidaksesuai');?>"></button>
+			</div>
+		</div>
+
 	</form>
 </div>
 
@@ -109,17 +139,20 @@ if (!isset($role)) {
 			<td>0.5000</td>
 			<td>FEDX</td>
 			<td>
-				<button class="commonButton shAnim blueGrad btnSelesai" data-url="<?php echo base_url('pemeriksa/flag/selesai');?>" data-dokumen="">Selesai</button>
+				<button class="commonButton shAnim blueGrad btnSelesaikan"  data-dokumen="">Selesaikan</button>
 				<button class="commonButton shAnim redGrad btnSelesai" data-url="<?php echo base_url('pemeriksa/flag/overtime');?>" data-dokumen="">Overtime!</button>
 			</td>
-			<td>
+			<!-- <td>
 				<label class="pointable ifullblock">
 					<input type="checkbox" class="pointable ifullblock" name="dokumen[]" value="" />
 				</label>
-			</td>
+			</td> -->
 		</tr>
 	</table>
 </div>
+
+
+
 
 <div id="blocker">
 	<div class="dialog">
@@ -155,6 +188,15 @@ function showBlocker(msg, progressbar, progress) {
 // sembunyiin blocker
 function hideBlocker() {
 	$('#blocker').hide();
+}
+
+function closeDlgKeputusan() {
+	$('#dlgKeputusan').hide();
+	$('.rowselected').removeClass('rowselected');
+}
+
+function closeDlgCatatan() {
+	$('#dlgCatatanPemeriksa').hide();
 }
 
 function updateGroupDokumenCheckBox() {
@@ -257,9 +299,9 @@ $(function() {
 		var fd = new FormData(this);
 
 		var doctype = $('input[name="doctype"]:checked').val();
-		var msg = "Mencari dokumen PIB outstanding...";
+		var msg = "Mencari dokumen CARNET outstanding...";
 
-		if (doctype != 'PIB')
+		if (doctype != 'CARNET')
 			msg = "Mencari dokumen CN/PIBK outstanding...";
 
 		showBlocker(msg);
@@ -274,7 +316,7 @@ $(function() {
 			success: function(data, status, jqXHR) {
 				
 
-				console.log(data);
+				// console.log(data);
 
 				if (data.dokumen.length < 1) {
 					$('#tblDokumen').hide();
@@ -314,6 +356,7 @@ $(function() {
 		});
 	});
 
+
 	// buat image preview, biar bsa liat image full
 	$('body').on('click', '.imagePreview', function() {
 		var link = $(this).attr('src');
@@ -334,15 +377,69 @@ $(function() {
 		}
 	});
 
+	// munculin popup dialog keputusan
+	$('.btnPopupCatatan').click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		$('#dlgCatatanPemeriksa').show();
+	});
+
+	// tombol utk simpan catatan
+	$('#btnSimpanCatatan').click(function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		// ok, isi data dummy dulu.
+		var catatan = $('#txtCatatan').val();
+
+		// masukin ke btn dummy
+		$('#btnDummy').data('catatan', decodeURIComponent(catatan)).click();
+
+		// close semua
+		closeDlgCatatan();
+		closeDlgKeputusan();
+	});
+
+	// pas klik tombol selesaikan
+	$('#tblDokumen').on('click', '.btnSelesaikan', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		// console.log($(this).position());
+		var pos = $(this).position();
+		var width = $('#dlgKeputusan').width();
+		var dokid = $(this).data('dokumen');
+		// console.log(pos);
+		// console.log(dokid);
+
+		$(this).closest('tr').addClass("rowselected");
+
+		// munculkan popup
+		$('#dlgKeputusan').show().offset({top: pos.top, left: pos.left-width});
+		// set popup data
+		$('#dlgKeputusan .btnSelesai').data('dokumen', dokid);
+		$('#btnDummy').data('dokumen', dokid);
+
+		// console.log($('#dlgKeputusan').position());
+	}); 
+
 	// pas klik tombol selesai
-	$('#tblDokumen').on('click', '.btnSelesai', function(e) {
+	$('#frmListDokumen').on('click', '.btnSelesai', function(e) {
 		e.preventDefault();
 		e.stopPropagation();
 
 		var url = $(this).data('url');
 		var doc_id = $(this).data('dokumen');
+		var catatan = $(this).data('catatan');
 
 		var completeURL = url + '/' + doc_id;
+
+		// if there's catatan, append it
+		if (typeof catatan != 'undefined')
+			completeURL += '/' + catatan;
+
+		console.log(completeURL);
 
 		// alert(completeURL);
 		showBlocker("Flag dokumen selesai...");
@@ -358,6 +455,10 @@ $(function() {
 			})
 			.always(function() {
 				hideBlocker();
+
+				// hide popup
+				// $('#dlgKeputusan').hide();
+				closeDlgKeputusan();
 			});
 	});
 

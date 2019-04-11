@@ -52,6 +52,10 @@ hr {
 	padding: 0;
 }
 
+.list li, .list ul {
+	padding: 2px 8px;
+}
+
 .sticky {
 	position: fixed;
 	top: 0;
@@ -240,6 +244,10 @@ select.styled{
 	background: linear-gradient(0deg, rgba(20, 220, 0, 0.25) 0%, rgba(0, 220, 20, 0.5) 100%);
 }
 
+.yellowGrad{
+	background: linear-gradient(0deg, rgba(220, 220, 20, 0.25) 0%, rgba(220, 220, 20, 0.5) 100%);
+}
+
 .commonButton:hover{
 	background: white;
 	color: rgba(0,0,0,0.5);
@@ -341,6 +349,7 @@ nav li:hover > a{
 nav li:hover > ul{
 	display: block;
 }
+
 /*parent style*/
 .prnt2{
 	padding-right: 16px;
@@ -793,6 +802,26 @@ input[readonly="true"] {
 	color: white;
 	text-shadow: 0 0 4px rgba(255,255,255,0.8);
 	content: 'LOADING...';
+}
+
+.graybox {
+	background: linear-gradient(40deg, rgba(210,210,210,0.82) 0%, rgba(220, 220, 220, 0.976) 100%);
+	background: -moz-linear-gradient(40deg, rgba(210,210,210,0.82) 0%, rgba(220, 220, 220, 0.976) 100%);
+	background: -webkit-linear-gradient(40deg, rgba(210,210,210,0.82) 0%, rgba(220, 220, 220, 0.976) 100%);
+}
+
+.keputusan {
+	position: absolute;
+	z-index: 9999;
+	border-radius: 2px;
+	box-shadow: 0 0 4px rgba(0,0,0,0.5);
+	padding: 8px;
+	margin: 0;
+	
+/*	top: 0;
+	right: 0;
+*/
+	text-align: center;
 }
 
 .floatForm{

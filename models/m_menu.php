@@ -137,7 +137,7 @@ class menu extends Base_Model {
 
 			// spesifik PPJK (PIB only)
 			if ($role & R_PPJK) {
-				$mn_pemeriksaan_pib = $this->addMenuItem('Pemeriksaan Fisik PIB', $mn_request_pemeriksaan, null, 'app/request/PIB');
+				$mn_pemeriksaan_pib = $this->addMenuItem('Pemeriksaan Fisik CARNET', $mn_request_pemeriksaan, null, 'app/request/CARNET');
 			}
 
 			if ($role & R_PJT) {
