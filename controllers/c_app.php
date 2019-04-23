@@ -228,7 +228,7 @@ class C_app extends Base_Controller{
 			'berat_kg'		=> $_POST['berat_kg']
 			);
 
-			$result = $this->app->submitRequest(
+			$headerRequest = $this->app->submitRequest(
 				$data['uploader_id'],
 				$data['gudang'],
 				$data['doctype'],
@@ -237,14 +237,16 @@ class C_app extends Base_Controller{
 				$data['importir'],
 				$data['jml_item'],
 				$data['berat_kg']
-				) && ($data['gudang'] != '' );
+				) ;
+
+			$result = $headerRequest && ($data['gudang'] != '' );
 
 			if ($result) {
 				// echo "data CN/PIBK submitted with batch id #".$result;
 				$returnData['success'] = true;
 				$returnData['error'] = '';
-				$returnData['msg'] = "data CN/PIBK submitted with batch id #".$result;
-				$returnData['redirect'] = base_url('app/viewbatch/'.$result);
+				$returnData['msg'] = "data CN/PIBK submitted with batch id #".$headerRequest;
+				$returnData['redirect'] = base_url('app/viewbatch/'.$headerRequest);
 			} else {
 				// echo "CN/PIBK failed. reason: " . $this->app->getLastError();
 				$returnData['success'] = false;
