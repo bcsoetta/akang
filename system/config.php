@@ -9,8 +9,8 @@ $config['path']['assets']='assets';	//where to store assets
 
 //databases
 $config['db']['hostname']='localhost';
-$config['db']['username']='root';
-$config['db']['password']='';
+$config['db']['username']='data_miner';
+$config['db']['password']='thel0newolf';
 $config['db']['database']='sapi';
 
 //session name

@@ -7,6 +7,27 @@ class C_app extends Base_Controller{
 		$this->load_model('menu');
 		$this->load_model('app');
 	}
+
+	// purge overtime
+	function purgeovertime($pass, $ageLimit) {
+		if (!isset($pass))
+			return forbid();
+
+		if (!isset($ageLimit))
+			$ageLimit = '24:00:00';
+
+		echo "Purging with limit {$ageLimit} <br>";
+
+		$ret = $this->app->purgeOutstandingDocByAge($ageLimit);
+
+		if ($ret != false) {
+			// print_r($ret);
+
+			echo "Purged {$ret['purgeCount']} out of {$ret['purgeSize']} stale docs";
+		} else {
+			echo "Purge failed. Reason: " . $this->app->getLastError();
+		}
+	}
 	
 	// halaman request pib
 	function request($doctype) {

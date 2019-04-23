@@ -29,6 +29,107 @@ class app extends Base_Model {
 		return $this->appTitle;
 	}
 
+	function purgeOutstandingDocByAge($ageLimit) {
+		$qInsertStatus = "INSERT INTO 
+								status_dok(dok_id, user_id, status, catatan)
+							VALUES (
+								:dok_id,
+								2,
+								'OVERTIME',
+								'Tidak dapat disediakan dalam waktu 24 jam'
+							)";
+
+		try {
+			// grab list of ole doc
+			$data = $this->getOutstandingDocByAge($ageLimit);
+
+			// prepare statement
+			$stmtInsertStatus = $this->db->prepare($qInsertStatus);
+
+			$purgeSize = count($data);
+			$purgeCount = 0;
+
+			foreach ($data as $row) {
+				$result = $stmtInsertStatus->execute(array(
+					':dok_id' => $row['dok_id']
+				));
+
+				if ($result == true)
+					$purgeCount ++;
+			}
+
+			return array(
+				'purgeSize' => $purgeSize,
+				'purgeCount' => $purgeCount
+			);
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+		}
+
+		return false;
+	}
+
+	function getOutstandingDocByAge($ageLimit) {
+		if (!isset($ageLimit)) {
+			$ageLimit = '24:00:00';
+		}
+
+		$queryStr = "SELECT
+						proc_list.dok_id,
+						a.jenis_dok,
+						a.no_dok,
+						a.tgl_dok,
+						a.importir,
+						b.time_uploaded,
+						TIMEDIFF(NOW(),b.time_uploaded) age
+					FROM
+						batch_detail a
+						INNER JOIN
+						(
+						SELECT
+							a.dok_id
+						FROM
+							status_dok a
+							INNER JOIN
+							(
+							SELECT
+								a.dok_id, MAX(a.time) latest_time
+							FROM
+								status_dok a
+							GROUP BY
+								a.dok_id
+							) lt
+							ON
+								a.dok_id = lt.dok_id
+								AND a.time = lt.latest_time
+						WHERE
+							a.`status` = 'ON_PROCESS'
+						) proc_list
+						ON
+							a.id = proc_list.dok_id
+						LEFT JOIN
+							batch_header b
+						ON
+							a.batch_id = b.id
+					WHERE
+						TIMEDIFF(NOW(),b.time_uploaded) > '{$ageLimit}'";
+
+		$stmtQuery = $this->db->prepare($queryStr);
+
+		try {
+			$result = $stmtQuery->execute();
+
+			$ret = $stmtQuery->fetchAll(PDO::FETCH_ASSOC);
+			return $ret;
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+
+			// echo $e->getMessage();
+		}
+
+		return null;
+	}
+
 	function dbtrInsertRequestHeader($uploader_id, $gudang) {
 		// sanitize input
 		$gudang = htmlentities(trim($gudang));
