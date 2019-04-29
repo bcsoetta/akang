@@ -1,4 +1,15 @@
 <p class="paragraph">
+	<h2>Akang revisi 1.4</h2>
+	<ul class="list">
+		<li>PEMERIKSA
+			<ul>
+				<li>List barang untuk yang outstanding dan overtime sudah dibuat</li>
+				<li>Performa pemeriksa meliputi total dokumen, yang diputus sesuai dan tidak sesuai</li>
+				<li>Detail mengenai dokumen yang diperiksa dan putusannya</li>
+			</ul>
+		</li>
+	</ul>
+
 	<h2>Akang revisi 1.3</h2>
 	<ul class="list">
 		<li>CARNET
