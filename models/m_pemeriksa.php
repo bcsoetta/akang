@@ -774,6 +774,7 @@ class pemeriksa extends Base_Model {
 						IFNULL(DATE_FORMAT(src.tgl_periksa, '%d/%m/%Y'), '-') tgl_periksa,
 						IFNULL(src.tgl_periksa, '-') tgl_periksa_raw,
 						IFNULL(src.gudang, '-') gudang,
+						IFNULL(src.status, '-') status,
 						IFNULL(src.total_periksa, '-') total_periksa,
 						IFNULL(src.jenis_dok, '-') jenis_dok
 					FROM
@@ -781,7 +782,7 @@ class pemeriksa extends Base_Model {
 						LEFT JOIN 
 						(
 							SELECT
-								b.id, b.fullname, DATE(a.time) tgl_periksa, e.gudang, COUNT(*) total_periksa, d.jenis_dok
+								b.id, b.fullname, DATE(a.time) tgl_periksa, e.gudang, a.status, COUNT(*) total_periksa, d.jenis_dok
 							FROM
 								status_dok a
 								JOIN user b
@@ -791,10 +792,11 @@ class pemeriksa extends Base_Model {
 								JOIN batch_header e
 									ON d.batch_id = e.id
 							WHERE
-								a.`status` = 'FINISHED'
+								a.`status` IN ('FINISHED', 'INCONSISTENT')
 								AND DATE(a.time) BETWEEN STR_TO_DATE(:datestart, '%d/%m/%Y') AND STR_TO_DATE(:dateend, '%d/%m/%Y')
 
 							GROUP BY
+								a.status,
 								a.user_id, 
 								DATE(a.time), 
 								e.gudang,
@@ -835,13 +837,14 @@ class pemeriksa extends Base_Model {
 	}
 
 	// fungsi ini ngambil seluruh dokumen yg pernah diperiksa oleh pemeriksa
-	public function queryRecordPemeriksaan($pemId, $tglPeriksa, $gudang, $doctype) {
+	public function queryRecordPemeriksaan($pemId, $tglPeriksa, $gudang, $doctype, $status) {
 		$qstring = "SELECT
 						b.no_dok,
 						b.tgl_dok,
 						b.importir,
 						b.jml_item,
-						b.berat_kg
+						b.berat_kg,
+						a.status
 					FROM
 						status_dok a
 						JOIN batch_detail b
@@ -849,7 +852,7 @@ class pemeriksa extends Base_Model {
 						JOIN batch_header c
 							ON b.batch_id = c.id		
 					WHERE
-						a.`status` = 'FINISHED'
+						a.`status` = :status
 						AND DATE(a.time) = :tglPeriksa
 						AND a.user_id = :pemId
 						AND c.gudang = :gudang
@@ -864,7 +867,8 @@ class pemeriksa extends Base_Model {
 				':tglPeriksa'	=> $tglPeriksa,
 				':pemId'		=> $pemId,
 				':gudang'		=> $gudang,
-				':doctype'		=> $doctype
+				':doctype'		=> $doctype,
+				':status'		=> $status
 			));
 
 			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);

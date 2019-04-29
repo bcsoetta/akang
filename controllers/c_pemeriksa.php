@@ -641,7 +641,7 @@ class C_pemeriksa extends Base_Controller {
 	}
 
 	// untuk melihat record list dokumen yang diperiksa
-	public function record($pemId, $tglPeriksa, $gudang, $doctype, $namaPemeriksa) {
+	public function record($pemId, $tglPeriksa, $gudang, $doctype, $namaPemeriksa, $status) {
 		$this->user->forceLogin();
 
 		$data = array();
@@ -653,7 +653,7 @@ class C_pemeriksa extends Base_Controller {
 			));
 
 		$recordData = array(
-			'data' => $this->pemeriksa->queryRecordPemeriksaan($pemId, $tglPeriksa, $gudang, $doctype),
+			'data' => $this->pemeriksa->queryRecordPemeriksaan($pemId, $tglPeriksa, $gudang, $doctype, $status),
 			'fullname' => $namaPemeriksa,
 			'doctype' => $doctype,
 			'tglPeriksa' => $tglPeriksa,

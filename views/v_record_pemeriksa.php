@@ -12,11 +12,19 @@
 				<th>Importir</th>
 				<th>Jml Item</th>
 				<th>Berat (kg)</th>
+				<th>Putusan</th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php
 			$no = 1;
+
+			$putusan = array(
+				'FINISHED'		=> 'SESUAI',
+				'INCONSISTENT'	=> 'TIDAK SESUAI',
+				'OVERTIME'		=> 'OVERTIME'
+			);
+
 			foreach ($data as $row) {
 				
 			?>
@@ -28,6 +36,7 @@
 				<td><?php echo $row['importir'];?></td>
 				<td><?php echo $row['jml_item'];?></td>
 				<td><?php echo $row['berat_kg'];?></td>
+				<td><?php echo $putusan[$row['status'] ];?></td>
 			</tr>
 
 			<?php

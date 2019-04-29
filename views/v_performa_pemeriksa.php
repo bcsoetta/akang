@@ -56,6 +56,12 @@
 		$skipRowDoc = array();
 		$skipped = array();
 
+		$statName = array(
+			'FINISHED'		=> 'SESUAI',
+			'INCONSISTENT'	=> 'TIDAK SESUAI',
+			'-'				=> '-'
+		);
+
 		// process each row data
 		foreach ($searchResult as $row) {
 			if (isset($skipRow[$row['id']]))
@@ -85,6 +91,8 @@
 				<th>Total Per Gudang</th>
 				<th>Jenis Dok</th>
 				<!-- <th>Jenis Dok</th> -->
+				<th>Sesuai</th>
+				<th>Tidak Sesuai</th>
 				<th>Total Semua</th>
 			</tr>
 		</thead>
@@ -92,7 +100,11 @@
 
 			<?php
 			$nomor = 1;
+			
 			$totalDok = 0;
+			$totalSesuai = 0;
+			$totalTidakSesuai = 0;
+
 			$subTotalDokPerDok = 0;
 			$subTotalDok = 0;
 			foreach ($searchResult as $row) {
@@ -134,12 +146,20 @@
 				<td><?php echo $row['gudang'];?></td>
 				<td>
 					<?php
-					
+
 					if ($row['gudang'] != '-') {
 						$totalDok += $row['total_periksa'];
 						$subTotalDok += $row['total_periksa'];
+
+						if ($row['status'] == 'FINISHED')
+							$totalSesuai += $row['total_periksa'];
+
+						if ($row['status'] == 'INCONSISTENT')
+							$totalTidakSesuai += $row['total_periksa'];
+
+						
 					?>
-					<a target="_blank" class="summable<?php echo $nomor-1;?>" href="<?php if($row['gudang'] != '-') echo base_url("pemeriksa/record/$row[id]/$row[tgl_periksa_raw]/$row[gudang]/$row[jenis_dok]/$row[fullname]"); else echo "javascript:void(0);"?>"> <?php echo $row['total_periksa'];?> </a>
+					<a target="_blank" class="summable<?php echo $nomor-1;?> <?php echo $row['status'].($nomor-1);?>" href="<?php if($row['gudang'] != '-') echo base_url("pemeriksa/record/$row[id]/$row[tgl_periksa_raw]/$row[gudang]/$row[jenis_dok]/$row[fullname]/$row[status]"); else echo "javascript:void(0);"?>"> <?php echo $row['total_periksa'] .' ('.$statName[$row['status']].')' ;?> </a>
 					<?php
 					} else {
 						echo $row['total_periksa'];
@@ -155,9 +175,18 @@
 					// $rowId = 0;
 				?>
 
+				<td class="<?php echo $className; ?> subtotalsesuai" rowspan="<?php echo $skipRow[$row['id']];?>">
+					-
+				</td>
+
+				<td class="<?php echo $className; ?> subtotaltidaksesuai" rowspan="<?php echo $skipRow[$row['id']];?>">
+					-
+				</td>
+
 				<td class="<?php echo $className; ?> subtotal" rowspan="<?php echo $skipRow[$row['id']];?>">
 					-
 				</td>
+
 
 				<?php
 				}
@@ -170,6 +199,9 @@
 
 			<tr>
 				<td colspan="6"><strong>TOTAL</strong></td>
+				
+				<td><?php echo $totalSesuai; ?></td>
+				<td><?php echo $totalTidakSesuai; ?></td>
 				<td><?php echo $totalDok; ?></td>
 			</tr>			
 			
@@ -246,5 +278,23 @@ $(function() {
 
 		$(v).text(sum);
 	});
+
+	$.each($('.subtotalsesuai'), function(k, v) {
+		var sum = 0;
+		$.each( $('.FINISHED'+(k+1)), function(kk, vv){
+			sum += parseInt($(vv).text());
+		} );
+
+		$(v).text(sum);
+	});	
+
+	$.each($('.subtotaltidaksesuai'), function(k, v) {
+		var sum = 0;
+		$.each( $('.INCONSISTENT'+(k+1)), function(kk, vv){
+			sum += parseInt($(vv).text());
+		} );
+
+		$(v).text(sum);
+	});	
 });
 </script>
