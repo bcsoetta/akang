@@ -10,7 +10,13 @@ if (!isset($role)) {
 <div>
 	<form id="frmCariDokumen" method="POST" action="<?php echo base_url('pemeriksa/getdokumen');?>">
 	<h2>
-		List Dokumen
+		List Dokumen 
+		<div style="display: inline-block;">
+			<select class="styled shAnim" id="status" name="status">
+				<option value="ON_PROCESS" selected>OUTSTANDING</option>
+				<option value="OVERTIME">OVERTIME</option>
+			</select>
+		</div>
 	</h2>
 	<p>
 		<label class="pointable">
@@ -299,10 +305,12 @@ $(function() {
 		var fd = new FormData(this);
 
 		var doctype = $('input[name="doctype"]:checked').val();
-		var msg = "Mencari dokumen CARNET outstanding...";
+		var status = $('#status').val();
 
-		if (doctype != 'CARNET')
-			msg = "Mencari dokumen CN/PIBK outstanding...";
+		var msg = "Mencari dokumen "+doctype+" "+status+"...";
+
+		// if (doctype != 'CARNET')
+		// 	msg = "Mencari dokumen CN/PIBK outstanding...";
 
 		showBlocker(msg);
 

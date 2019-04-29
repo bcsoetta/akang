@@ -370,6 +370,7 @@ class C_pemeriksa extends Base_Controller {
 		// let's limit user's visibility
 		$doctype = $_POST['doctype'];
 		$lokasi = $_POST['lokasi'];
+		$status = $_POST['status'];
 
 		// absen
 		$absensi = $this->pemeriksa->getAbsensi($this->user->getData()['id']);
@@ -382,7 +383,7 @@ class C_pemeriksa extends Base_Controller {
 
 		// print_r($_POST);
 
-		$dokumen = $this->pemeriksa->getDokumenOutstanding($_POST['doctype'], $_POST['lokasi']);
+		$dokumen = $this->pemeriksa->getDokumenOutstanding($doctype, $lokasi, $status);
 		// echo '<br><br>';
 
 		// print_r($dokumen);

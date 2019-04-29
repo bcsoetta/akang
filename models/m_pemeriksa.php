@@ -671,12 +671,16 @@ class pemeriksa extends Base_Model {
 	// fungsi ini ngembaliin list dokumen lengkap utk diperiksa
 	//	$doctype : 'PIB' atau 'CN_PIBK'
 	//	$lokasi : array berisi list lokasi ['GDHL', 'APRI']
-	public function getDokumenOutstanding($doctype, $lokasi) {
+	//  $status : status terakhir dari dokumen. enum {ON_PROCESS, OVERTIME}
+	public function getDokumenOutstanding($doctype, $lokasi, $status) {
 		array_walk($lokasi, function(&$v) {
 			$v = $this->db->quote($v);
 		});
 
 		$listLokasi = implode(',', $lokasi);
+
+		if (!isset($status))
+			$status = 'ON_PROCESS';
 
 		$qstring = "
 			SELECT
@@ -721,7 +725,7 @@ class pemeriksa extends Base_Model {
 				ON
 					b.photo_id = d.id
 			WHERE
-				a.`status` = 'ON_PROCESS'
+				a.`status` = :status
 				AND b.jenis_dok = :doctype
 				AND c.gudang IN ($listLokasi)
 			";
@@ -730,7 +734,8 @@ class pemeriksa extends Base_Model {
 			$stmt = $this->db->prepare($qstring);
 
 			$result = $stmt->execute(array(
-				':doctype'	=> $doctype
+				':doctype'	=> $doctype,
+				':status'	=> $status
 				));
 
 			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
