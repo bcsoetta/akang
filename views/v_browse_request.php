@@ -33,6 +33,7 @@ if (!isset($dateend))
 				<option value="ALL" selected>Semua</option>
 				<option value="PIB">PIB</option>
 				<option value="CN_PIBK">CN/PIBK</option>
+				<option value="CARNET">CARNET</option>
 			</select>
 
 			<input class="commonButton blueGrad shAnim" name="submit" value="Cari" type="submit" />

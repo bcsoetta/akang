@@ -472,7 +472,7 @@ class C_app extends Base_Controller{
 			'paramvalue' => isset($_POST['paramvalue']) ? htmlentities(trim($_POST['paramvalue'])) : null,
 			'doctype' => isset($_POST['doctype']) ? htmlentities(trim($_POST['doctype'])) : 'ALL',
 			'pageid' => isset($_POST['pageid']) ? htmlentities(trim($_POST['pageid'])) : 1,
-			'itemperpage' => isset($_POST['itemperpage']) ? htmlentities(trim($_POST['itemperpage'])) : 3	// defaults to 10 item per page
+			'itemperpage' => isset($_POST['itemperpage']) ? htmlentities(trim($_POST['itemperpage'])) : 10	// defaults to 10 item per page
 			);
 
 		// force id?

@@ -651,7 +651,7 @@ class app extends Base_Model {
 			
 		}
 
-		if ( in_array(strtoupper($param['doctype']), array('PIB', 'CN_PIBK')) ) {
+		if ( in_array(strtoupper($param['doctype']), array('PIB', 'CN_PIBK', 'CARNET')) ) {
 			// use the parameter
 			$qstring .= $q_where_jenis_dok;
 			$qtotal .= $q_where_jenis_dok;

@@ -729,6 +729,13 @@ class pemeriksa extends Base_Model {
 				AND b.jenis_dok = :doctype
 				AND c.gudang IN ($listLokasi)
 			";
+		
+		// SPECIAL CASE FOR OVERTIME BIIIIITCH!!!
+		$dayDiffAllowed = 5;
+		
+		if ($status == 'OVERTIME') {
+			$qstring .= " AND TIMESTAMPDIFF(DAY, a.time, NOW()) <= $dayDiffAllowed";
+		}
 
 		try {
 			$stmt = $this->db->prepare($qstring);

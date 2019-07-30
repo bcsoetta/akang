@@ -286,6 +286,9 @@ $(function() {
 			$('#tblPemeriksa tbody tr').hide();
 			$('#tblPemeriksa tbody tr[data-type="AVAILABLE"]').show();
 		}
+
+		// renumber
+		$('tr:visible span.rownum').map( (x,v) => {v.innerText = (x+1);} );
 	});
 
 	// button update
