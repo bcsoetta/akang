@@ -28,7 +28,7 @@ function base_url($target){
 	if(isset($_SERVER['HTTPS']))
 		$scheme='https://';
 	$scheme.=$_SERVER['SERVER_NAME'];
-	if($_SERVER['SERVER_PORT'] != '80')
+	if($_SERVER['SERVER_PORT'] != '80' && $_SERVER['SERVER_PORT'] != '443')
 		$scheme.=':'.$_SERVER['SERVER_PORT'];
 	if(isset($config['path']['base']) && strlen($config['path']['base'])>0)
 		$scheme.='/'.$config['path']['base'];
