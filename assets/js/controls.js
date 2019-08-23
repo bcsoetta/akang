@@ -4,7 +4,7 @@ var datepickerOptions = {
 		showOn: 'both',
 		dateFormat: 'dd/mm/yy',
 		buttonText: ' ',
-		buttonImage: 'http://192.168.146.248/akang/assets/img/calendar.gif',
+		buttonImage: window.location.protocol + '//' + window.location.hostname + '/assets/img/calendar.gif',
 		buttonImageOnly: true,
 		changeMonth: true,
 		changeYear: true,

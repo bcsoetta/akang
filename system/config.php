@@ -1,5 +1,5 @@
 <?php
-//path directives
+//path directivess
 $config=array();
 $config['path']['base']='';	//used to exclude base_path from REQUEST_URI
 $config['path']['models']='models';	//where the models are stored
