@@ -4,7 +4,7 @@ var datepickerOptions = {
 		showOn: 'both',
 		dateFormat: 'dd/mm/yy',
 		buttonText: ' ',
-		buttonImage: window.location.protocol + '//' + window.location.hostname + '/assets/img/calendar.gif',
+		buttonImage: calendar_gif,//window.location.protocol + '//' + window.location.hostname + '/assets/img/calendar.gif',
 		buttonImageOnly: true,
 		changeMonth: true,
 		changeYear: true,

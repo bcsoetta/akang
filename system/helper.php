@@ -48,7 +48,7 @@ function link_js($js_filename){
 
 function get_img_path($imgpath){
 	global $config;
-	return base_url($config['path']['assets'].'/images/'.$imgpath);
+	return base_url($config['path']['assets'].'/img/'.$imgpath);
 }
 
 function link_img($imgpath){

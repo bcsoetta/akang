@@ -6,6 +6,10 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 		<?php
+		// ugly hack! to ensure calendar gif is loaded no matter what
+		echo "<script>let calendar_gif='".get_img_path('calendar.gif')."'</script>";
+		?>
+		<?php
 		link_css('jquery-ui.min.css');
 		link_css('jquery.multiselect.css');
 		link_css('reset.css');
