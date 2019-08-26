@@ -7,7 +7,7 @@ define('DOC_PIB', 1);
 define('DOC_CNPIBK', 2);
 
 class app extends Base_Model {
-	private $error = '';
+	// private $error = '';
 
 	private $appTitle = 'AKANG - BC Soetta';
 	
@@ -17,13 +17,13 @@ class app extends Base_Model {
 		$this->load_db();
 	}
 
-	function getLastError() {
-		return $this->error;
-	}
+	// function getLastError() {
+	// 	return $this->error;
+	// }
 
-	function setLastError($msg) {
-		$this->error = $msg;
-	}
+	// function setLastError($msg) {
+	// 	$this->error = $msg;
+	// }
 
 	function getTitle() {
 		return $this->appTitle;

@@ -7,19 +7,19 @@
 class image extends Base_Model {
 	public static $imgFolder = 'assets/img/upload/';
 
-	private $lastErr = '';
+	// private $lastErr = '';
 
 	function __construct() {
 		parent::__construct();
 	}
 
-	function setLastError($msg) {
-		$this->lastErr = $msg;
-	}
+	// function setLastError($msg) {
+	// 	$this->lastErr = $msg;
+	// }
 
-	function getLastError() {
-		return $this->lastErr;
-	}
+	// function getLastError() {
+	// 	return $this->lastErr;
+	// }
 
 	function saveBase64Image($filename, $base64Data) {
 		// sanitize

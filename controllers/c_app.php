@@ -6,6 +6,7 @@ class C_app extends Base_Controller{
 		$this->load_model('user');
 		$this->load_model('menu');
 		$this->load_model('app');
+		$this->load_model('gudang');
 	}
 
 	// purge overtime
@@ -619,7 +620,46 @@ class C_app extends Base_Controller{
 	}
 
 	public function managegudang($id) {
-		echo "To be constructed...";
+		$this->user->forceLogin();
+
+		if (!$this->user->hasRole(R_SUPERUSER))
+			return forbid();
+
+		// apakah sedang menginput data?
+		if (isset($_POST['action'])) {
+			// coba tambah data
+			if (isset($_POST['kode_gudang']) && isset($_POST['grup_gudang'])) {
+				$kdGudang = strtoupper( trim($_POST['kode_gudang']) );
+				$grpGudang = strtoupper( trim($_POST['grup_gudang']) );
+
+				// coba simpan
+				if ($this->gudang->add($kdGudang, $grpGudang)) {
+					$this->user->message('Gudang ' . $kdGudang . ' berhasil ditambahkan');
+				} else {
+					$this->user->message('Gagal menambah Gudang');
+				}
+			}
+		}
+
+		$data = array();
+		$data['pagetitle'] = $this->app->getTitle() . ' Manage Data Gudang';
+		$data['user'] = $this->user->getData();
+		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
+			$this->user->getData()['id'],
+			$this->user->getData()['role_code']
+			));
+		$data['message'] = $this->user->getMessage();
+
+		// content
+		$data['mainContent'] = $this->load_view(
+			'list_gudang', 
+			[
+				'listGudang' => $this->gudang->getListGudang()
+			], 
+			true);
+
+		// load view
+		$this->load_view('index', $data);
 	}
 }
 ?>

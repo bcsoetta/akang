@@ -1,5 +1,7 @@
 <?php
 class Base_Model{
+	protected $errMsg='';
+
 	function __construct(){
 	}
 	
@@ -17,6 +19,14 @@ class Base_Model{
 			echo $e->getMessage();
 		}
 		return $this->db;
+	}
+
+	function setLastError($msg) {
+		$this->errMsg = $msg;
+	}
+
+	function getLastError() {
+		return $this->errMsg;
 	}
 };
 ?>

@@ -60,7 +60,7 @@
 
 		<?php
 		//handle user message. set using $user->message('stuff');
-		if(isset($message)){
+		if(isset($message) && strlen($message)){
 		?>
 		<p id="umsg">
 		<?php echo $message;?>

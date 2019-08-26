@@ -16,7 +16,7 @@ define('R_CARNET_HANDLER', 32);	// Currently unused
 define('USER_SESSION', 60*30);
 
 class user extends Base_Model{
-	private $lastErr = "";
+	// private $lastErr = "";
 
 	function __construct(){
 		parent::__construct();
@@ -31,13 +31,13 @@ class user extends Base_Model{
 		}
 	}
 
-	public function setLastError($msg) {
-		$this->lastErr = $msg;
-	}
+	// public function setLastError($msg) {
+	// 	$this->lastErr = $msg;
+	// }
 
-	public function getLastError() {
-		return $this->lastErr;
-	}
+	// public function getLastError() {
+	// 	return $this->lastErr;
+	// }
 
 	public function sapiLogin($username, $pass, $ipAddress, $port) {
 		// validasi data
@@ -399,8 +399,13 @@ class user extends Base_Model{
 	public function message($msg) {
 		if(isset($msg)){
 			$_SESSION['loginData']['message'] = $msg;
-		}else
-			return $_SESSION['loginData']['message'];
+		}
+	}
+
+	public function getMessage() {
+		$ret = $_SESSION['loginData']['message'];
+		$_SESSION['loginData']['message'] = '';
+		return $ret;
 	}
 
 	//check if user is logged in
@@ -453,7 +458,9 @@ class user extends Base_Model{
 			SELECT
 				a.gudang
 			FROM
-				grup_gudang a;
+				grup_gudang a
+			WHERE
+				a.gudang <> 'BCSH';
 		";
 
 		try {

@@ -15,19 +15,21 @@ class pemeriksa extends Base_Model {
 	const LOKASI_ALL = -1;
 
 	// private member
-	private $lastError = '';
+	// private $lastError = '';
 	
 	public function __construct() {
+		parent::__construct();
+		
 		$this->load_db();
 	}
 
-	public function setLastError($msg) {
-		$this->lastError = $msg;
-	}
+	// public function setLastError($msg) {
+	// 	$this->lastError = $msg;
+	// }
 
-	public function getLastError() {
-		return $this->lastError;
-	}
+	// public function getLastError() {
+	// 	return $this->lastError;
+	// }
 
 	// fungsi ini ngembaliin list pemeriksa aktif/seluruhnya
 	public function getListPemeriksa($activeOnly = false) {
