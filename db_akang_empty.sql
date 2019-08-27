@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
--- Host:                         192.168.146.248
--- Server version:               10.2.21-MariaDB-log - MariaDB Server
--- Server OS:                    Linux
--- HeidiSQL Version:             10.2.0.5599
+-- Host:                         127.0.0.1
+-- Server version:               10.1.38-MariaDB - mariadb.org binary distribution
+-- Server OS:                    Win64
+-- HeidiSQL Version:             9.5.0.5196
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -22,16 +22,18 @@ CREATE TABLE IF NOT EXISTS `absensi_pemeriksa` (
   `user_id` int(10) unsigned NOT NULL,
   `tgl_absen` date NOT NULL,
   `status` set('PIB','CN_PIBK','CARNET') NOT NULL,
-  `wkt_absen` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `wkt_absen` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id_tgl_absen` (`user_id`,`tgl_absen`),
   KEY `tgl_absen` (`tgl_absen`),
   KEY `status` (`status`),
   KEY `wkt_absen` (`wkt_absen`),
   CONSTRAINT `FK_absensi_pemeriksa_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42884 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.absensi_pemeriksa: ~0 rows (approximately)
+/*!40000 ALTER TABLE `absensi_pemeriksa` DISABLE KEYS */;
+/*!40000 ALTER TABLE `absensi_pemeriksa` ENABLE KEYS */;
 
 -- Dumping structure for event sapi.auto_absen_pulang
 DELIMITER //
@@ -142,14 +144,16 @@ CREATE TABLE IF NOT EXISTS `batch_detail` (
   KEY `batch_id` (`batch_id`),
   CONSTRAINT `FK_batch_detail_batch_header` FOREIGN KEY (`batch_id`) REFERENCES `batch_header` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_batch_detail_pkb_photo` FOREIGN KEY (`photo_id`) REFERENCES `pkb_photo` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=507740 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.batch_detail: ~0 rows (approximately)
+/*!40000 ALTER TABLE `batch_detail` DISABLE KEYS */;
+/*!40000 ALTER TABLE `batch_detail` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.batch_header
 CREATE TABLE IF NOT EXISTS `batch_header` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `time_uploaded` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `time_uploaded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `uploader_id` int(10) unsigned NOT NULL,
   `gudang` varchar(16) NOT NULL,
   PRIMARY KEY (`id`),
@@ -159,27 +163,33 @@ CREATE TABLE IF NOT EXISTS `batch_header` (
   FULLTEXT KEY `gudang` (`gudang`),
   CONSTRAINT `FK_batch_header_grup_gudang` FOREIGN KEY (`gudang`) REFERENCES `grup_gudang` (`gudang`),
   CONSTRAINT `FK_batch_header_user` FOREIGN KEY (`uploader_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=48999 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.batch_header: ~0 rows (approximately)
+/*!40000 ALTER TABLE `batch_header` DISABLE KEYS */;
+/*!40000 ALTER TABLE `batch_header` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.grup_gudang
 CREATE TABLE IF NOT EXISTS `grup_gudang` (
   `gudang` varchar(16) NOT NULL,
   `grup` varchar(16) NOT NULL,
-  PRIMARY KEY (`gudang`,`grup`),
+  PRIMARY KEY (`gudang`),
   KEY `grup` (`grup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.grup_gudang: ~1 rows (approximately)
+/*!40000 ALTER TABLE `grup_gudang` DISABLE KEYS */;
+INSERT INTO `grup_gudang` (`gudang`, `grup`) VALUES
+	('BCSH', 'LINI1');
+/*!40000 ALTER TABLE `grup_gudang` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.notifikasi
 CREATE TABLE IF NOT EXISTS `notifikasi` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `targetid` int(10) unsigned NOT NULL,
   `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `time` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `read` tinyint(4) NOT NULL DEFAULT 0,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `read` tinyint(4) NOT NULL DEFAULT '0',
   `readtime` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `time` (`time`),
@@ -187,7 +197,9 @@ CREATE TABLE IF NOT EXISTS `notifikasi` (
   CONSTRAINT `FK_notifikasi_user` FOREIGN KEY (`targetid`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.notifikasi: ~0 rows (approximately)
+/*!40000 ALTER TABLE `notifikasi` DISABLE KEYS */;
+/*!40000 ALTER TABLE `notifikasi` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.pkb_photo
 CREATE TABLE IF NOT EXISTS `pkb_photo` (
@@ -195,12 +207,14 @@ CREATE TABLE IF NOT EXISTS `pkb_photo` (
   `filename` varchar(256) NOT NULL,
   `real_filename` varchar(256) NOT NULL,
   `hash` varchar(32) NOT NULL,
-  `last_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `last_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash` (`hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.pkb_photo: ~0 rows (approximately)
+/*!40000 ALTER TABLE `pkb_photo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pkb_photo` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.status_dok
 CREATE TABLE IF NOT EXISTS `status_dok` (
@@ -208,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `status_dok` (
   `dok_id` int(10) unsigned NOT NULL,
   `status` enum('ON_PROCESS','FINISHED','CANCELED','OVERTIME','INCONSISTENT') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `catatan` text NOT NULL,
-  `time` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `user_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `dok_id` (`dok_id`),
@@ -217,9 +231,11 @@ CREATE TABLE IF NOT EXISTS `status_dok` (
   KEY `FK_status_dok_user` (`user_id`),
   CONSTRAINT `FK_status_dok_batch_detail` FOREIGN KEY (`dok_id`) REFERENCES `batch_detail` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_status_dok_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=673751 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.status_dok: ~0 rows (approximately)
+/*!40000 ALTER TABLE `status_dok` DISABLE KEYS */;
+/*!40000 ALTER TABLE `status_dok` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.status_pemeriksa
 CREATE TABLE IF NOT EXISTS `status_pemeriksa` (
@@ -227,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `status_pemeriksa` (
   `user_id` int(10) unsigned NOT NULL,
   `status` enum('AVAILABLE','BUSY') NOT NULL,
   `lokasi` varchar(16) NOT NULL,
-  `time` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `status` (`status`),
@@ -235,9 +251,11 @@ CREATE TABLE IF NOT EXISTS `status_pemeriksa` (
   KEY `FK_status_pemeriksa_grup_gudang` (`lokasi`),
   CONSTRAINT `FK_status_pemeriksa_grup_gudang` FOREIGN KEY (`lokasi`) REFERENCES `grup_gudang` (`gudang`) ON UPDATE CASCADE,
   CONSTRAINT `FK_status_pemeriksa_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=23759 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.status_pemeriksa: ~0 rows (approximately)
+/*!40000 ALTER TABLE `status_pemeriksa` DISABLE KEYS */;
+/*!40000 ALTER TABLE `status_pemeriksa` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.user
 CREATE TABLE IF NOT EXISTS `user` (
@@ -249,9 +267,14 @@ CREATE TABLE IF NOT EXISTS `user` (
   `active` enum('Y','N') NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.user: ~2 rows (approximately)
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` (`id`, `username`, `fullname`, `password`, `role`, `active`) VALUES
+	(1, 'admin', 'Administrator', 'e10adc3949ba59abbe56e057f20f883e', 'PJT,PPJK,ADMIN_PABEAN,SUPERUSER,PEMERIKSA,CARNET_HANDLER', 'Y'),
+	(2, 'system', 'SYSTEM', 'f379eaf3c831b04de153469d1bec345e', 'PJT', 'Y');
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.user_gudang_pair
 CREATE TABLE IF NOT EXISTS `user_gudang_pair` (
@@ -263,19 +286,23 @@ CREATE TABLE IF NOT EXISTS `user_gudang_pair` (
   CONSTRAINT `FK_user_gudang_pair_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.user_gudang_pair: ~0 rows (approximately)
+/*!40000 ALTER TABLE `user_gudang_pair` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_gudang_pair` ENABLE KEYS */;
 
 -- Dumping structure for table sapi.user_session
 CREATE TABLE IF NOT EXISTS `user_session` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `ip_address` int(10) unsigned NOT NULL,
-  `time_started` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `time_started` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expire` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=63576 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Data exporting was unselected.
+-- Dumping data for table sapi.user_session: ~0 rows (approximately)
+/*!40000 ALTER TABLE `user_session` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_session` ENABLE KEYS */;
 
 -- Dumping structure for trigger sapi.batch_detail_after_insert
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
