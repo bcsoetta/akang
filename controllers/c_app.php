@@ -93,14 +93,16 @@ class C_app extends Base_Controller{
 		//---proses file/error
 		//--klo gk, 
 		//---error
+		// $moved = move_uploaded_file($_FILES['inputFile']['tmp_name'], 'assets/' . );
+	
+		
 
 		// First check : MAKE SURE THE KEY AND THE FILE EXIST!!
 		if (!isset($_FILES['inputFile'])) {
-			header('HTTP/1.0 500 The form did not send the input file!');
-			return;
+			return header('HTTP/1.1 404 The form did not send the input file!');
+			
 		} else if (count($_FILES['inputFile']) < 1) {
-			header('HTTP/1.0 600 The form send something, but it aint the input file');
-			return;
+			return header('HTTP/1.1 600 The form send something, but it aint the input file');
 		} 
 
 		// Second check : MAKE SURE THERE'S NO ERROR!!
@@ -108,9 +110,16 @@ class C_app extends Base_Controller{
 
 		if ($code != UPLOAD_ERR_OK) {
 			// something's wrong
-			header('HTTP/1.0 400 '.$errCodes[$code]);
+			header('HTTP/1.1 400 '.$errCodes[$code]);
 			die();
-		}
+		} 
+
+
+		// move uploaded files temporarily to assets
+		$tm = date('YmdHis');
+		$tmpFilename = 'assets/' . $tm . '-' .$_FILES['inputFile']['name'];
+		$moved = move_uploaded_file($_FILES['inputFile']['tmp_name'], $tmpFilename);
+		// return header('HTTP/1.1 404 file stored at -> ' . ($moved ? 'check assets' : 'FAILED') );
 
 		// Third check : MAKE SURE MIME TYPE IS IN ALLOWED MIME TYPE
 		/*
@@ -123,10 +132,13 @@ class C_app extends Base_Controller{
 		$this->load_model('excel');
 
 		// $data = $this->excel->loadRawData($_FILES['inputFile']['tmp_file']);
-		$retData = $this->excel->readRawData($_FILES['inputFile']['tmp_name']);
+		// now load the moved file
+		$retData = $this->excel->readRawData($tmpFilename);
+		// delete afterward to safe space
+		unlink($tmpFilename);
 
 		if (!$retData) {
-			header("HTTP/1.0 400 For some reason, the file was not readable. Check your files, dude!");
+			header("HTTP/1.1 400 For some reason, the file was not readable. Check your files, dude!");
 			die();
 		}
 
