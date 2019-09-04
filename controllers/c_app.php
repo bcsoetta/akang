@@ -116,7 +116,7 @@ class C_app extends Base_Controller{
 
 
 		// move uploaded files temporarily to assets
-		$tm = date('YmdHis');
+		$tm = date('YmdHis') . '-' . rand(2, 22222222);
 		$tmpFilename = 'assets/' . $tm . '-' .$_FILES['inputFile']['name'];
 		$moved = move_uploaded_file($_FILES['inputFile']['tmp_name'], $tmpFilename);
 		// return header('HTTP/1.1 404 file stored at -> ' . ($moved ? 'check assets' : 'FAILED') );
