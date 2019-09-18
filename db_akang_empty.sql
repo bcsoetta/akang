@@ -265,6 +265,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `password` varchar(32) NOT NULL,
   `role` set('PJT','PPJK','ADMIN_PABEAN','SUPERUSER','PEMERIKSA','CARNET_HANDLER') NOT NULL,
   `active` enum('Y','N') NOT NULL,
+  `sso_user_id` INT(10) UNSIGNED NOT NULL
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
