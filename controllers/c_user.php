@@ -25,6 +25,25 @@ class C_user extends Base_Controller{
 		if ($this->user->isLoggedIn()) {
 			// redirect
 			header('location: '.base_url(''));
+		} else if ( ($userInfo = $this->user->getSSOProfile() ) != null ) {
+			// welp it's logged in SSO, so gotta create new user
+			echo 'New User detected!';
+			// create new user
+			$newUser = $this->user->createDefaultUser(
+				$userInfo['username'], 
+				$userInfo['name'],
+				'Y',
+				$userInfo['user_id']
+			);
+
+			if ($newUser) {
+				// echo ", so created with id : " . $newUser;
+				// just redirect to base page
+				header('location: ' . base_url(''));
+			} else {
+				echo $this->user->getLastError();
+			}	
+			exit;		
 		}
 
 		$data=array();

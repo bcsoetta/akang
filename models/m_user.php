@@ -94,7 +94,10 @@ class user extends Base_Model{
 		// next, grab the role by the user id
 		$roleData = $this->grabUserDataBySSOId($userInfo['user_id']);
 
-		if (!$roleData) {
+		// can access only if the user data exist and active flat equals to 'Y'
+		$canAccess = (isset($roleData['active']) ? ($roleData['active'] == 'Y' ? true: false) : $roleData);
+
+		if (!$canAccess) {
 			$ret['loginData'] = null;
 			return false; 
 		} else {
@@ -523,7 +526,8 @@ class user extends Base_Model{
 		$qSelectRole = "
 			SELECT
 				role,
-				role+0 role_code
+				role+0 role_code,
+				active
 			FROM
 				user
 			WHERE
@@ -546,8 +550,9 @@ class user extends Base_Model{
 				if (count($rows) > 0) {
 					// grab data
 					return array(
-						'role' => 		explode(',', $rows[0]['role']),
-						'role_code' => 	$rows[0]['role_code']
+						'role' 		=> explode(',', $rows[0]['role']),
+						'role_code' => $rows[0]['role_code'],
+						'active'	=> $rows[0]['active']
 					);
 				}
 			}
@@ -572,6 +577,46 @@ class user extends Base_Model{
 		);
 	}
 
+	// check if got valid sso
+	public function getSSOProfile() {
+		$userInfo = $this->sso->getUserInfo();
+
+		return $userInfo;
+	}
+
+	// create default user
+	public function createDefaultUser($username, $fullname, $active, $ssoId) {
+		$qInsertUser = "
+			INSERT INTO 
+				user(username, fullname, password, active, sso_user_id, role)
+			VALUES (
+				:username, :fullname, MD5('handledbysso'), :active, :ssoid, ''
+			)
+		";
+
+		try {
+			$stmtInsertUser = $this->db->prepare($qInsertUser);
+
+			$result = $stmtInsertUser->execute(array(
+				'username'	=> $username,
+				'fullname'	=> $fullname,
+				'active'	=> $active,
+				'ssoid'		=> $ssoId
+			));
+
+			if ($result) {
+				$uid = $this->db->lastInsertId();
+
+				return $uid;
+			}
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+			return false;
+		}
+
+		return false;
+	}
+
 	//check if user is logged in
 	public function isLoggedIn() {
 		// check if we're logged in
@@ -584,6 +629,31 @@ class user extends Base_Model{
 		} else {
 			// grab local user data
 			$localUserInfo = $this->grabUserDataBySSOId($userInfo['user_id']);	// user info from local db
+
+			// can we find it? if not, create a new one with default privileges
+			if ($localUserInfo === false) {
+				// if it's truely FALSE (heh), that means it can't be found on the database
+				// add new user with basest default privilege (no role)
+				$newUser = $this->add(
+					$userInfo['username'],		// username
+					'unused-handled-by-sso',	// password
+					$userInfo['name'],			// fullname
+					'',							// role [BY DEFAULT NO ROLE]
+					'Y',						// active flag
+					null						// gudang [BY DEFAULT NO GUDANG]
+				);
+				
+				return false;
+			} else {
+				// we can find it, but is it active?
+				if ($localUserInfo['active'] != 'Y') {
+					// not active, just straight return false and redirect to login with error
+					// modify login data?
+					$localUserInfo['role_code'] = 0;
+					$localUserInfo['role'] = array();
+				}
+			}
+
 			$sessionData = $this->createSessionData($userInfo, $localUserInfo);
 
 
@@ -592,19 +662,21 @@ class user extends Base_Model{
 			// well, check if we already have stored session
 			if (isset($_SESSION['loginData']['id']) && isset($userInfo['user_id']) ) {
 				// echo "has session and sso login";
-				// compare to our data, then restore it
-				if ($_SESSION['loginData']['id'] != $userInfo['user_id']) {
+				// always store data to capture changes
+				if (1 /*$_SESSION['loginData']['id'] != $userInfo['user_id']*/) {
 					// different user login, remove old user
 					unset($_SESSION['loginData']);
 
 					// reregister with new user
 					// echo "You're fucked4";
 					return $this->registerUserSession($sessionData);
-				} else {
+				} /*else {
 					// same user logged in, nothing changes
 					// echo "You're fucked3";
+					// check role changes here
+
 					return true;
-				}
+				}*/
 			} else if (is_array($userInfo)) {
 				// print_r($sessionData);
 				// no session data, but there's login info. Store it
@@ -972,7 +1044,7 @@ class user extends Base_Model{
 	*/
 	public function add($username, $password, $fullname, $role, $active, $gudang) {
 		// gotta sanitize shit here
-		if (strlen($username) < 4) {
+		if (strlen($username) < 3) {
 			$this->setLastError("Username too short: minimum of 4 chars required");
 			return false;
 		}
@@ -982,7 +1054,7 @@ class user extends Base_Model{
 			return false;
 		}
 
-		if (strlen($fullname) < 6) {
+		if (strlen($fullname) < 3) {
 			$this->setLastError("Full name too short: ensure it's at least 6 chars");
 			return false;
 		}
