@@ -31,7 +31,7 @@
 			<div class="textual section">
 				<p style="text-align:center;">Login</p>
 			</div>
-			<form id="loginForm" class="clearfix" method="POST" action="<?php echo base_url('user/validate');?>">
+			<form id="loginForm" class="clearfix" method="POST" action="<?php echo base_url('user/validatesso');?>">
 				<div class="textual section">
 					<p>
 						<span>Username</span>

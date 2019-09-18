@@ -4,6 +4,9 @@
 	berisi fungsi2 pembantu utk memanage user
 */
 
+require_once  'libraries/ceisax/vendor/autoload.php';
+use Jasny\SSO\Broker;
+
 // Role user
 define('R_PJT', 1);
 define('R_PPJK', 2);
@@ -29,6 +32,10 @@ class user extends Base_Model{
 			if(!isset($_SESSION['loginData']))
 				$_SESSION['loginData'] = array();
 		}
+
+		// call sso
+		$this->sso = new Broker('http://192.168.146.248/ssoserver/', '3', 'q9Qk3e8PY2');
+		$this->sso->attach(true);
 	}
 
 	// public function setLastError($msg) {
@@ -38,6 +45,102 @@ class user extends Base_Model{
 	// public function getLastError() {
 	// 	return $this->lastErr;
 	// }
+	public function ssoLogin($username, $pass, $ipAddress, $port) {
+		// default return data, will be adjusted to comply
+		// with AKANG and JASNY SSO return value
+		$ret = array(
+			'status'	=> false,
+			'error'		=> array('login error'),
+			'loginData'	=> null
+		);
+
+		// attempt sso login
+		try {
+			$result = $this->sso->login($username, $pass);
+			$result['status'] = true;
+		} catch (NotAttachedException $e) {
+			// $redirectUrl = base_url('user/login?error=' . urlencode($e->getMessage()));
+			// header('location: ' . $redirectUrl);
+			
+			$ret['error'][0] = $e->getMessage();
+			return $ret;
+		} catch (Jasny\SSO\Exception $e) {
+			// $redirectUrl = base_url('user/login?error=' . urlencode($e->getMessage()));
+			// header('location: ' . $redirectUrl);
+
+			$ret['error'][0] = $e->getMessage();
+			return $ret;
+		}
+
+		// pass here, log it into the AKANG DB
+		// first, grab user info
+		$userInfo = $this->sso->getUserInfo();
+
+		// do we fail?
+		if ($userInfo == null) {
+			$ret['error'][0] = 'Failed to grab user data from SSO';
+			return $ret;
+		}
+
+		// okay, append it into our user data
+		$ret['loginData'] = array(
+			'id'	=> $userInfo['user_id'],
+			'sso_user_id' => $userInfo['user_id'],
+			'username'	=> $username,
+			'fullname'	=> $userInfo['name'],
+			'role' => null
+		);
+
+		// next, grab the role by the user id
+		$roleData = $this->grabUserDataBySSOId($userInfo['user_id']);
+
+		if (!$roleData) {
+			$ret['loginData'] = null;
+			return false; 
+		} else {
+			$ret['loginData']['role'] = $roleData['role'];
+			$ret['loginData']['role_code'] = $roleData['role_code'];
+			$ret['status'] = true;
+		}
+		/* $qSelectRole = "
+			SELECT
+				role,
+				role+0 role_code
+			FROM
+				user
+			WHERE
+				sso_user_id = :sso_user_id
+			LIMIT 
+				1
+		";
+
+		try {
+			$stmtSelectRole = $this->db->prepare($qSelectRole);
+
+			if ($stmtSelectRole->execute(array(
+				'sso_user_id' => $ret['loginData']['sso_user_id']
+			))) {
+				// grab data
+				$row = $stmtSelectRole->fetchAll();
+
+				if (count($row) > 0) {
+					$ret['loginData']['role'] = explode(',', $row[0]['role']);
+					$ret['loginData']['role_code'] = $row[0]['role_code'] + 0;
+					$ret['status'] = true;
+
+					return $ret;
+				}
+			}
+		} catch (PDOException $e) {
+			$ret['error'][0] = $e->getMessage();
+			$ret['loginData'] = null;
+
+			return $ret;
+		} */
+
+		return $ret;
+
+	}
 
 	public function sapiLogin($username, $pass, $ipAddress, $port) {
 		// validasi data
@@ -311,6 +414,7 @@ class user extends Base_Model{
 		return $this->getData()['timeout'] >= time();
 	}
 
+
 	// fill session
 	public function registerUserSession($loginData) {
 		if (isset($loginData['id'])
@@ -396,6 +500,11 @@ class user extends Base_Model{
 		$_SESSION['loginData'] = array();
 	}
 
+	public function attemptSSOLogout() {
+		$this->attemptLogout();
+		$this->sso->logout();
+	}
+
 	public function message($msg) {
 		if(isset($msg)){
 			$_SESSION['loginData']['message'] = $msg;
@@ -408,10 +517,114 @@ class user extends Base_Model{
 		return $ret;
 	}
 
+	// grab data from sso
+	public function grabUserDataBySSOId($ssoId) {
+		// create login data from SSO
+		$qSelectRole = "
+			SELECT
+				role,
+				role+0 role_code
+			FROM
+				user
+			WHERE
+				sso_user_id = :sso_user_id
+			LIMIT 
+				1
+		";
+
+		// grab it
+		try {
+			$stmtSelectRole = $this->db->prepare($qSelectRole);
+
+			$result = $stmtSelectRole->execute(array(
+				'sso_user_id' => $ssoId
+			));
+
+			if ($result) {
+				$rows = $stmtSelectRole->fetchAll(PDO::FETCH_ASSOC);
+
+				if (count($rows) > 0) {
+					// grab data
+					return array(
+						'role' => 		explode(',', $rows[0]['role']),
+						'role_code' => 	$rows[0]['role_code']
+					);
+				}
+			}
+		} catch (PDOException $e) {
+			$this->setLastError($e->getMessage());
+			return false;
+		}
+
+		return false;
+	}
+
+	// create session data
+	public function createSessionData($ssoLoginData, $localRoleData) {
+		// build a login data from sso login data and local role data
+		return array(
+			'id'	=> $ssoLoginData['user_id'],
+			'sso_user_id' => $ssoLoginData['user_id'],
+			'username'	=> $ssoLoginData['username'],
+			'fullname'	=> $ssoLoginData['name'],
+			'role' => $localRoleData['role'],
+			'role_code' => $localRoleData['role_code']
+		);
+	}
+
 	//check if user is logged in
 	public function isLoggedIn() {
-		//gotta refresh time here.....
-		return isset($_SESSION['loginData']['id']);
+		// check if we're logged in
+		// we might be already logged in SSO
+		$userInfo = $this->sso->getUserInfo();	// user info from sso
+
+		if ($userInfo == null || $userInfo == 'NULL') {
+			// echo 'n000l';
+			return false;
+		} else {
+			// grab local user data
+			$localUserInfo = $this->grabUserDataBySSOId($userInfo['user_id']);	// user info from local db
+			$sessionData = $this->createSessionData($userInfo, $localUserInfo);
+
+
+			// var_dump($sessionData);
+
+			// well, check if we already have stored session
+			if (isset($_SESSION['loginData']['id']) && isset($userInfo['user_id']) ) {
+				// echo "has session and sso login";
+				// compare to our data, then restore it
+				if ($_SESSION['loginData']['id'] != $userInfo['user_id']) {
+					// different user login, remove old user
+					unset($_SESSION['loginData']);
+
+					// reregister with new user
+					// echo "You're fucked4";
+					return $this->registerUserSession($sessionData);
+				} else {
+					// same user logged in, nothing changes
+					// echo "You're fucked3";
+					return true;
+				}
+			} else if (is_array($userInfo)) {
+				// print_r($sessionData);
+				// no session data, but there's login info. Store it
+				// echo "You're fucked2";
+				// $_SESSION['loginData'] = array();
+				// $truest = array( 
+				// 	isset($sessionData['id']),
+				// 	isset($sessionData['username']),
+				// 	isset($sessionData['fullname']),
+				// 	isset($sessionData['role'])
+				// );
+
+				// var_dump($truest);
+
+				return $this->registerUserSession($sessionData);
+				
+			} 
+		}
+		// echo "You're fucked";
+		return false;
 	}
 
 	//get important data

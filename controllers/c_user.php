@@ -1,4 +1,8 @@
 <?php
+
+require_once  'libraries/ceisax/vendor/autoload.php';
+use Jasny\SSO\Broker;
+
 class C_user extends Base_Controller{
 	public function __construct(){
 		parent::__construct();	//call parent's ctor
@@ -7,6 +11,9 @@ class C_user extends Base_Controller{
 		$this->load_model('carnet');
 		$this->load_model('app');
 		$this->load_model('menu');
+
+		$this->sso = new Broker('http://192.168.146.248/ssoserver/', '3', 'q9Qk3e8PY2');
+		$this->sso->attach(true);
 	}
 	
 	function index(){
@@ -14,6 +21,12 @@ class C_user extends Base_Controller{
 	}
 
 	function login($error){
+		// gotta check if already logged in
+		if ($this->user->isLoggedIn()) {
+			// redirect
+			header('location: '.base_url(''));
+		}
+
 		$data=array();
 		$data['pagetitle'] = $this->app->getTitle();
 		if(isset($_GET['error']))
@@ -22,7 +35,13 @@ class C_user extends Base_Controller{
 	}
 
 	function logout(){
-		$this->user->attemptLogout();
+		// $this->user->attemptLogout();
+		// header('location: '.base_url(''));
+		$this->logoutsso();
+	}
+
+	function logoutsso() {
+		$this->user->attemptSSOLogout();
 		header('location: '.base_url(''));
 	}
 
@@ -64,6 +83,47 @@ class C_user extends Base_Controller{
 				header('location: '.base_url('user/login?error=1'));
 			}
 		}*/
+	}
+
+	public function dummysso() {
+		var_dump($this->sso->login('admin', '123'));
+	}
+
+	public function getlogindata() {
+		var_dump($this->user->getData());
+	}
+
+	public function checklogin() {
+		var_dump( $this->user->isLoggedIn() );
+	}
+
+	// validate data dari SSO
+	public function validatesso() {
+		// validate login using sso
+
+		// load user model
+		$this->load_model('user');
+
+		// grab necessary parameters
+		$username	= isset($_POST['username']) ? $_POST['username'] : '';
+		$password	= isset($_POST['password']) ? $_POST['password'] : '';
+		$ipAddress	= $_SERVER['REMOTE_ADDR'];
+		$port	= $_SERVER['REMOTE_PORT'];
+
+		$result = $this->user->ssoLogin($username, $password, $ipAddress, $port);
+
+		// result is set, meaning login successful, store user data
+		if ($result['status']) {
+			// login success, save user session
+			$this->user->registerUserSession($result['loginData']);
+			// set message
+			$this->user->message('Selamat Datang, ' . $result['loginData']['fullname']);
+			// redirect
+			header('location: ' . base_url(''));
+		} else {
+			header('location: '.base_url('user/login?error='. htmlentities($result['error'][0])));
+		}
+		// var_dump($result);
 	}
 
 	// this page is for changing password
@@ -260,6 +320,27 @@ class C_user extends Base_Controller{
 			);
 
 		$this->load_view('message_redirect', $data, false);
+	}
+
+	public function ssologin() {
+		$loginUrl = base_url('user/login');
+
+		try {
+			$result = $this->sso->login('admin', '1231');
+		} catch (NotAttachedException $e) {
+			$redirectUrl = base_url('user/login?error=' . urlencode($e->getMessage()));
+			header('location: ' . $redirectUrl);
+			exit;
+		} catch (Jasny\SSO\Exception $e) {
+			$redirectUrl = base_url('user/login?error=' . urlencode($e->getMessage()));
+			header('location: ' . $redirectUrl);
+		}
+		
+
+		if (isset($result)) {
+			// header('Content-type: application/json');
+			var_dump($result);
+		}
 	}
 }
 ?>
