@@ -8,12 +8,19 @@ require_once  'libraries/ceisax/vendor/autoload.php';
 use Jasny\SSO\Broker;
 
 // Role user
-define('R_PJT', 1);
-define('R_PPJK', 2);
-define('R_ADMIN_PABEAN', 4);
-define('R_SUPERUSER', 8);
-define('R_PEMERIKSA', 16);
-define('R_CARNET_HANDLER', 32);	// Currently unused
+// define('R_PJT', 1);
+// define('R_PPJK', 2);
+// define('R_ADMIN_PABEAN', 4);
+// define('R_SUPERUSER', 8);
+// define('R_PEMERIKSA', 16);
+// define('R_CARNET_HANDLER', 32);	// Currently unused
+
+define('R_PJT', 'PJT');
+define('R_PPJK', 'PPJK');
+define('R_ADMIN_PABEAN', 'ADMIN_PABEAN');
+define('R_SUPERUSER', 'SUPERUSER');
+define('R_PEMERIKSA', 'PEMERIKSA');
+define('R_CARNET_HANDLER', 'CARNET_HANDLER');	// Currently unused
 
 // Settingan session user
 define('USER_SESSION', 60*30);
@@ -91,21 +98,28 @@ class user extends Base_Model{
 			'sso_user_id' => $userInfo['user_id'],
 			'username'	=> $username,
 			'fullname'	=> $userInfo['name'],
-			'role' => null
+			'role' => null,
+			'role_code' => null
 		);
 
 		// next, grab the role by the user id
-		$roleData = $this->grabUserDataBySSOId($userInfo['user_id']);
+		// $roleData = $this->grabUserDataBySSOId($userInfo['user_id']);
+		$roleData = $userInfo['apps_data']['3']['roles'] ?? null;
 
 		// can access only if the user data exist and active flat equals to 'Y'
-		$canAccess = (isset($roleData['active']) ? ($roleData['active'] == 'Y' ? true: false) : $roleData);
+		// $canAccess = (isset($roleData['active']) ? ($roleData['active'] == 'Y' ? true: false) : $roleData);
+
+		// canAccess or active flag is already supplied by SSO. use it
+		$canAccess = $result['status'];
 
 		if (!$canAccess) {
 			$ret['loginData'] = null;
 			return false; 
 		} else {
-			$ret['loginData']['role'] = $roleData['role'];
-			$ret['loginData']['role_code'] = $roleData['role_code'];
+			// $ret['loginData']['role'] = $roleData['role'];
+			// $ret['loginData']['role_code'] = $roleData['role_code'];
+			$ret['loginData']['role'] = $roleData;
+			$ret['loginData']['role_code'] = $roleData;
 			$ret['status'] = true;
 		}
 		/* $qSelectRole = "
@@ -321,11 +335,27 @@ class user extends Base_Model{
 	}
 
 	// cek role
-	public function hasRole($role_id) {
-		if (!$this->isLoggedIn())
-			return false;
+	// public function hasRole($role_id) {
+	// 	if (!$this->isLoggedIn())
+	// 		return false;
 
-		return ($_SESSION['loginData']['role_code'] & $role_id) == $role_id;
+	// 	return ($_SESSION['loginData']['role_code'] & $role_id) == $role_id;
+	// }
+
+	public function hasRole($roleName) {
+		if (!$this->isLoggedIn()) {
+			return false;
+		}
+
+		// force to be an array (handle all case: single role, role string delimited, array)
+		if (!is_array($roleName)) {
+			$roleName = explode(",", $roleName);
+		}
+
+		// now do array intersection test
+		$intersect = array_intersect($roleName, $_SESSION['loginData']['role']);
+
+		return count($intersect) > 0;
 	}
 
 	// get gudang
@@ -428,6 +458,7 @@ class user extends Base_Model{
 			&& isset($loginData['fullname'])
 			&& isset($loginData['role'])) {
 
+			unset($_SESSION['loginData']);
 			$_SESSION['loginData'] = $loginData;
 
 			$_SESSION['loginData']['timeout'] = time() + USER_SESSION;
@@ -524,7 +555,7 @@ class user extends Base_Model{
 	}
 
 	// grab data from sso
-	public function grabUserDataBySSOId($ssoId) {
+	public function grabUserDataBySSOIdx($ssoId) {
 		// create login data from SSO
 		$qSelectRole = "
 			SELECT
@@ -630,76 +661,76 @@ class user extends Base_Model{
 			// echo 'n000l';
 			return false;
 		} else {
-			// grab local user data
-			$localUserInfo = $this->grabUserDataBySSOId($userInfo['user_id']);	// user info from local db
+			// // grab local user data
+			// $localUserInfo = $this->grabUserDataBySSOId($userInfo['user_id']);	// user info from local db
 
-			// can we find it? if not, create a new one with default privileges
-			if ($localUserInfo === false) {
-				// if it's truely FALSE (heh), that means it can't be found on the database
-				// add new user with basest default privilege (no role)
-				$newUser = $this->add(
-					$userInfo['username'],		// username
-					'unused-handled-by-sso',	// password
-					$userInfo['name'],			// fullname
-					'',							// role [BY DEFAULT NO ROLE]
-					'Y',						// active flag
-					null						// gudang [BY DEFAULT NO GUDANG]
-				);
+			// // can we find it? if not, create a new one with default privileges
+			// if ($localUserInfo === false) {
+			// 	// if it's truely FALSE (heh), that means it can't be found on the database
+			// 	// add new user with basest default privilege (no role)
+			// 	$newUser = $this->add(
+			// 		$userInfo['username'],		// username
+			// 		'unused-handled-by-sso',	// password
+			// 		$userInfo['name'],			// fullname
+			// 		'',							// role [BY DEFAULT NO ROLE]
+			// 		'Y',						// active flag
+			// 		null						// gudang [BY DEFAULT NO GUDANG]
+			// 	);
 				
-				return false;
-			} else {
-				// we can find it, but is it active?
-				if ($localUserInfo['active'] != 'Y') {
-					// not active, just straight return false and redirect to login with error
-					// modify login data?
-					$localUserInfo['role_code'] = 0;
-					$localUserInfo['role'] = array();
-				}
-			}
+			// 	return false;
+			// } else {
+			// 	// we can find it, but is it active?
+			// 	if ($localUserInfo['active'] != 'Y') {
+			// 		// not active, just straight return false and redirect to login with error
+			// 		// modify login data?
+			// 		$localUserInfo['role_code'] = 0;
+			// 		$localUserInfo['role'] = array();
+			// 	}
+			// }
 
-			$sessionData = $this->createSessionData($userInfo, $localUserInfo);
+			// $sessionData = $this->createSessionData($userInfo, $localUserInfo);
 
 
 			// var_dump($sessionData);
 
 			// well, check if we already have stored session
-			if (isset($_SESSION['loginData']['id']) && isset($userInfo['user_id']) ) {
-				// echo "has session and sso login";
-				// always store data to capture changes
-				if (1 /*$_SESSION['loginData']['id'] != $userInfo['user_id']*/) {
-					// different user login, remove old user
-					unset($_SESSION['loginData']);
+			// if (isset($_SESSION['loginData']['id']) && isset($userInfo['user_id']) ) {
+			// 	// echo "has session and sso login";
+			// 	// always store data to capture changes
+			// 	if (1 /*$_SESSION['loginData']['id'] != $userInfo['user_id']*/) {
+			// 		// different user login, remove old user
+			// 		unset($_SESSION['loginData']);
 
-					// reregister with new user
-					// echo "You're fucked4";
-					return $this->registerUserSession($sessionData);
-				} /*else {
-					// same user logged in, nothing changes
-					// echo "You're fucked3";
-					// check role changes here
+			// 		// reregister with new user
+			// 		// echo "You're fucked4";
+			// 		return $this->registerUserSession($sessionData);
+			// 	} /*else {
+			// 		// same user logged in, nothing changes
+			// 		// echo "You're fucked3";
+			// 		// check role changes here
 
-					return true;
-				}*/
-			} else if (is_array($userInfo)) {
-				// print_r($sessionData);
-				// no session data, but there's login info. Store it
-				// echo "You're fucked2";
-				// $_SESSION['loginData'] = array();
-				// $truest = array( 
-				// 	isset($sessionData['id']),
-				// 	isset($sessionData['username']),
-				// 	isset($sessionData['fullname']),
-				// 	isset($sessionData['role'])
-				// );
+			// 		return true;
+			// 	}*/
+			// } else if (is_array($userInfo)) {
+			// 	// print_r($sessionData);
+			// 	// no session data, but there's login info. Store it
+			// 	// echo "You're fucked2";
+			// 	// $_SESSION['loginData'] = array();
+			// 	// $truest = array( 
+			// 	// 	isset($sessionData['id']),
+			// 	// 	isset($sessionData['username']),
+			// 	// 	isset($sessionData['fullname']),
+			// 	// 	isset($sessionData['role'])
+			// 	// );
 
-				// var_dump($truest);
+			// 	// var_dump($truest);
 
-				return $this->registerUserSession($sessionData);
+			// 	return $this->registerUserSession($sessionData);
 				
-			} 
+			// } 
 		}
 		// echo "You're fucked";
-		return false;
+		return true;
 	}
 
 	//get important data

@@ -673,5 +673,19 @@ class C_app extends Base_Controller{
 		// load view
 		$this->load_view('index', $data);
 	}
+
+	public function dumpsession() {
+		$data = array();
+		$data['pagetitle'] = $this->app->getTitle() . ' Manage Data Gudang';
+		$data['user'] = $this->user->getData();
+		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
+			$this->user->getData()['id'],
+			$this->user->getData()['role_code']
+			));
+		$data['message'] = $this->user->getMessage();
+		$data['mainContent'] = json_encode($this->user->getData());
+
+		$this->load_view('index', $data);
+	}
 }
 ?>

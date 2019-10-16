@@ -102,21 +102,21 @@ class menu extends Base_Model {
 
 			// $mn_manual = $this->addMenuItem('Manual', $mn_user, null, 'user/manual');
 
-		if ($role & (R_SUPERUSER|R_ADMIN_PABEAN|R_PPJK|R_PJT))
+		if (array_intersect($role , [R_SUPERUSER,R_ADMIN_PABEAN,R_PPJK,R_PJT]))
 			$mn_contoh_file = $this->addMenuItem('Contoh File Upload', $mn_user, null, 'assets/dok_pengajuan.xls');
 
 
 		// menu umum browse
 		// hanya utk PPJK, PJT, ADMIN, ADMIN_PABEAN, PEMERIKSA
-		if ($role & (R_PPJK|R_PJT|R_ADMIN_PABEAN|R_SUPERUSER|R_PEMERIKSA)) {
+		if (array_intersect($role , [R_PPJK,R_PJT,R_ADMIN_PABEAN,R_SUPERUSER,R_PEMERIKSA])) {
 			$mn_browse = $this->addMenuItem('Browse', null, 'normal', null);
 
 				// for browsing request. 
-				if ($role & (R_PPJK|R_PJT) )
+				if (array_intersect($role , [R_PPJK,R_PJT]) )
 					$mn_browse_request = $this->addMenuItem('Permohonan Pemeriksaan Fisik', $mn_browse, null, 'app/browse/request');
 
 				// browse outstanding buat smua
-				if ($role & (R_SUPERUSER|R_ADMIN_PABEAN|R_PPJK|R_PJT)) {
+				if (array_intersect($role , [R_SUPERUSER,R_ADMIN_PABEAN,R_PPJK,R_PJT])) {
 					$mn_browse_outstanding = $this->addMenuItem('Outstanding Per Gudang', $mn_browse, null, 'app/browse/outstanding');
 				}
 
@@ -131,22 +131,22 @@ class menu extends Base_Model {
 
 
 		// menu PJT
-		if ($role & (R_PPJK|R_PJT)) {
+		if (array_intersect($role , [R_PPJK,R_PJT])) {
 			// root menu PJT/PPJK (upload)
 			$mn_request_pemeriksaan = $this->addMenuItem('Request', null, 'normal', null);
 
 			// spesifik PPJK (PIB only)
-			if ($role & R_PPJK) {
+			if (array_intersect($role, [R_PPJK])) {
 				$mn_pemeriksaan_pib = $this->addMenuItem('Pemeriksaan Fisik CARNET', $mn_request_pemeriksaan, null, 'app/request/CARNET');
 			}
 
-			if ($role & R_PJT) {
+			if (array_intersect($role ,[R_PJT])) {
 				$mn_pemeriksaan_cnpibk = $this->addMenuItem('Pemeriksaan Fisik CN/PIBK', $mn_request_pemeriksaan, null, 'app/request/CN_PIBK');
 			}
 		}
 
 		// menu pemeriksa
-		if ($role & R_PEMERIKSA) {
+		if (array_intersect($role , [R_PEMERIKSA])) {
 			$mn_pemeriksa = $this->addMenuItem('Pemeriksa', null, 'normal', null);
 
 			// $mn_periksa_pib = $this->addMenuItem('List PIB', $mn_pemeriksa, null, 'app/listpib');
@@ -156,7 +156,7 @@ class menu extends Base_Model {
 		}
 
 		// menu admin pabean
-		if ($role & R_ADMIN_PABEAN) {
+		if (array_intersect($role , [R_ADMIN_PABEAN])) {
 			$mn_admin_pabean = $this->addMenuItem('Admin Pabean', null, 'normal', null);
 
 			$mn_absen_pemeriksa = $this->addMenuItem('Absen Pemeriksa', $mn_admin_pabean, null, 'pemeriksa/absen');
@@ -167,7 +167,7 @@ class menu extends Base_Model {
 		}
 
 		// menu superuser
-		if ($role & R_SUPERUSER) {
+		if (array_intersect($role , [R_SUPERUSER])) {
 			$mn_admin = $this->addMenuItem('Superuser', null, 'normal', null);
 
 			$mn_manage_user = $this->addMenuItem('Manage User', $mn_admin, null, 'app/manage/user');

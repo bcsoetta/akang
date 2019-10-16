@@ -21,7 +21,7 @@ class C_index extends Base_Controller{
 			$this->user->getData()['role_code']
 			));
 
-		if ($this->user->getData()['role_code'] == R_PEMERIKSA) {
+		if ($this->user->hasRole(R_PEMERIKSA)) {
 			$pemeriksa = $this->pemeriksa->getPemeriksa(pemeriksa::ROLE_ALL, pemeriksa::STATUS_ALL, pemeriksa::LOKASI_ALL);
 
 			$viewData = array(

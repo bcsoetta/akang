@@ -122,8 +122,13 @@ class C_user extends Base_Controller{
 	}
 
 	public function checklogin() {
-		var_dump( $this->user->isLoggedIn() );
-		var_dump( $this->user->getSSOProfile());
+		// var_dump( $this->user->isLoggedIn() );
+		// var_dump( $this->user->getSSOProfile());
+
+		if ($this->user->isLoggedIn()) {
+			header('Content-type: application/json;');
+			echo json_encode($this->user->getSSOProfile());
+		}
 	}
 
 	// validate data dari SSO
@@ -143,8 +148,11 @@ class C_user extends Base_Controller{
 
 		// result is set, meaning login successful, store user data
 		if ($result['status']) {
+			// var_dump($result['loginData']);
+			
 			// login success, save user session
 			$this->user->registerUserSession($result['loginData']);
+			// exit;
 			// set message
 			$this->user->message('Selamat Datang, ' . $result['loginData']['fullname']);
 			// redirect
