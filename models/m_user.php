@@ -104,7 +104,7 @@ class user extends Base_Model{
 
 		// next, grab the role by the user id
 		// $roleData = $this->grabUserDataBySSOId($userInfo['user_id']);
-		$roleData = $userInfo['apps_data']['3']['roles'] ?? null;
+		$roleData = $userInfo['apps_data']['3']['roles'] ?? [];
 
 		// can access only if the user data exist and active flat equals to 'Y'
 		// $canAccess = (isset($roleData['active']) ? ($roleData['active'] == 'Y' ? true: false) : $roleData);
