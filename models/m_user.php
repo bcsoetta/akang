@@ -42,7 +42,9 @@ class user extends Base_Model{
 	// public function setLastError($msg) {
 	// 	$this->lastErr = $msg;
 	// }
-
+	public function dummyLogin($username, $pass) {
+		return $this->sso->login($username, $pass);
+	}
 	// public function getLastError() {
 	// 	return $this->lastErr;
 	// }

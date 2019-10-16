@@ -104,8 +104,17 @@ class C_user extends Base_Controller{
 		}*/
 	}
 
-	public function dummysso() {
-		var_dump($this->sso->login('admin', '123'));
+	public function dummysso($username, $password) {
+		header('Content-type: application/json;');
+		try {
+			echo json_encode($this->user->dummyLogin($username, $password));
+		} catch (\Exception $e) {
+			header('HTTP/1.1 400 Bad Request');
+			echo json_encode([
+				'message' => $e->getMessage(),
+				'code' => $e->getCode()
+			]);
+		}
 	}
 
 	public function getlogindata() {
@@ -114,6 +123,7 @@ class C_user extends Base_Controller{
 
 	public function checklogin() {
 		var_dump( $this->user->isLoggedIn() );
+		var_dump( $this->user->getSSOProfile());
 	}
 
 	// validate data dari SSO
