@@ -661,6 +661,9 @@ class user extends Base_Model{
 			// echo 'n000l';
 			return false;
 		} else {
+			// but perhaps our session data is lost?
+			if (!$this->getData())
+				setcookie('sso_token_3');
 			// // grab local user data
 			// $localUserInfo = $this->grabUserDataBySSOId($userInfo['user_id']);	// user info from local db
 
