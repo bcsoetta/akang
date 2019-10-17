@@ -42,7 +42,7 @@ class user extends Base_Model{
 
 		// call sso
 		// $ssoUrl = 'http://ssoserv.sh1.tech/';
-		$this->sso = new Broker(/*$ssoUrl*/'http://192.168.146.248/ssoserver/', '3', 'q9Qk3e8PY2');
+		$this->sso = new Broker(/*$ssoUrl*/'http://sso.soetta.xyz/', '3', 'q9Qk3e8PY2');
 		$this->sso->attach(true);
 	}
 

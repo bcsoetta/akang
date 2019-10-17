@@ -12,7 +12,7 @@ class C_user extends Base_Controller{
 		$this->load_model('app');
 		$this->load_model('menu');
 
-		$this->sso = new Broker('http://192.168.146.248/ssoserver/', '3', 'q9Qk3e8PY2');
+		$this->sso = new Broker('http://sso.soetta.xyz/', '3', 'q9Qk3e8PY2');
 		$this->sso->attach(true);
 	}
 	
