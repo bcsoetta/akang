@@ -52,6 +52,26 @@ class user extends Base_Model{
 	public function dummyLogin($username, $pass) {
 		return $this->sso->login($username, $pass);
 	}
+
+	// build session data
+	public function buildSessionDataFromUserInfo($userInfo) {
+		if (!$userInfo) {
+			return null;
+		}
+
+		$roleData = $userInfo['apps_data']['3']['roles'] ?? [];
+
+		$ret['loginData'] = array(
+			'id'	=> $userInfo['user_id'],
+			'sso_user_id' => $userInfo['user_id'],
+			'username'	=> $userInfo['username'],
+			'fullname'	=> $userInfo['name'],
+			'role' => $roleData,
+			'role_code' => $roleData
+		);
+
+		return $ret;
+	}
 	// public function getLastError() {
 	// 	return $this->lastErr;
 	// }
@@ -662,8 +682,29 @@ class user extends Base_Model{
 			return false;
 		} else {
 			// but perhaps our session data is lost?
-			if (!$this->getData())
-				setcookie('sso_token_3');
+			if (!$this->getData()) {
+				// re-register session data from user info
+				// $this->registerUserSession($this->buildSessionDataFromUserInfo($userInfo));
+				// // redirect
+				// header('location: ' . base_url(''));
+
+				// return true;
+
+				// echo "SSO Token still valid but php session is lost!";
+				// echo "Here's the token data:";
+				// var_dump($userInfo);
+				// echo "<br><br>";
+				// echo "Here's potential session data:";
+				$sessionData = $this->buildSessionDataFromUserInfo($userInfo);
+				// var_dump($sessionData);
+
+				// echo "<br><br>";
+				// echo "After registering:";
+				$this->registerUserSession($sessionData['loginData']);
+				// var_dump($this->getData());
+				// exit;
+
+			}
 			// // grab local user data
 			// $localUserInfo = $this->grabUserDataBySSOId($userInfo['user_id']);	// user info from local db
 
