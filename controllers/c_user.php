@@ -55,12 +55,18 @@ class C_user extends Base_Controller{
 
 	function logout(){
 		// $this->user->attemptLogout();
-		// header('location: '.base_url(''));
+		
 		$this->logoutsso();
+		header('location: '.base_url(''));
 	}
 
 	function logoutsso() {
-		$this->user->attemptSSOLogout();
+		try {
+			$this->user->attemptSSOLogout();
+		} catch (\Exception $e) {
+			//throw $th;
+		}
+		
 		header('location: '.base_url(''));
 	}
 
