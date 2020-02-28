@@ -1050,6 +1050,123 @@ class app extends Base_Model {
 		}
 	}
 
+	// this function creates a bap
+	function createBap($gudang, $id_pjt, $id_pemeriksa, $tanggal) {
+
+		$qGetNomorBap = "
+		SELECT getSequence('bd.0303', YEAR(NOW()), 'bap') nomor_bap
+		";
+
+		$qInsertBapHeader = "
+		INSERT INTO bap_header(
+			id_pemeriksa,
+			id_pjt,
+			nomor,
+			nomor_lengkap,
+			gudang,
+			tanggal
+		)
+		VALUES (
+			:id_pemeriksa,
+			:id_pjt,
+			:nomor,
+			CONCAT('BAP-', LPAD(:nomor2, 6, '0'), '/KPU.03/BD.0303/', YEAR(NOW()) ),
+			:gudang,
+			:tanggal
+		)
+		";
+
+		$qInsertDetailId ="
+		INSERT INTO bap_detail(
+			bap_id,
+			detail_id
+		)
+
+		SELECT
+			:id_bap,
+			d.id
+		FROM
+			status_dok s
+			JOIN
+			batch_detail d
+			ON
+				s.dok_id = d.id
+			JOIN
+			batch_header h
+			ON
+				d.batch_id = h.id
+			JOIN
+			user pjt
+			ON
+				h.uploader_id = pjt.id
+			LEFT JOIN
+			bap_detail pd
+			ON
+				pd.detail_id = d.id
+		WHERE
+			DATE(s.time) = :tanggal
+			AND
+			s.`status` IN ('FINISHED', 'INCONSISTENT')
+			AND 
+			s.user_id = :id_pemeriksa
+			AND
+			pjt.id = :id_pjt
+			AND
+			h.gudang = :gudang
+			AND
+			pd.id IS NULL
+		";
+
+		// try use transaction for this
+		$this->db->beginTransaction();
+
+		try {
+			// 1st. grab nomor
+			$stmtNomorBap = $this->db->prepare($qGetNomorBap);
+			$stmtNomorBap->execute();
+
+			$data = $stmtNomorBap->fetchAll(PDO::FETCH_ASSOC);
+
+			$nomor_bap = $data[0]['nomor_bap'];
+
+			// 2. rekam header
+			$stmtInsertBapHeader = $this->db->prepare($qInsertBapHeader);
+			$stmtInsertBapHeader->execute([
+				'id_pemeriksa'	=> $id_pemeriksa,
+				'id_pjt'		=> $id_pjt,
+				'nomor'			=> $nomor_bap,
+				'nomor2'		=> $nomor_bap,
+				'gudang'		=> $gudang,
+				'tanggal'		=> $tanggal
+			]);
+
+			// grab header last id
+			$id_bap = $this->db->lastInsertId();
+
+
+			// 3. insert detail data
+			$stmtInsertDetailId = $this->db->prepare($qInsertDetailId);
+			$stmtInsertDetailId->execute([
+				'id_bap'	=> $id_bap,
+				'tanggal'	=> $tanggal,
+				'id_pemeriksa'	=> $id_pemeriksa,
+				'id_pjt'	=> $id_pjt,
+				'gudang'	=> $gudang
+			]);
+
+			$this->db->commit();
+
+			// return the id
+			return $id_bap;
+		} catch (\Exception $e) {
+			$this->db->rollback();
+
+			$this->setLastError($e->getMessage());
+
+			return false;
+		}
+	}
+
 	// this function queries the statistics for each warehouse
 	function queryOutstanding($gudang) {
 		$q_head = "

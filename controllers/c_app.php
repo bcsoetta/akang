@@ -479,6 +479,21 @@ class C_app extends Base_Controller{
 		echo json_encode($data);
 	}
 
+	// create bap based on parameter
+	function createbap($gudang, $id_pjt, $id_pemeriksa, $tanggal) {
+		$id_bap	= $this->app->createBap($gudang, $id_pjt, $id_pemeriksa, $tanggal);
+
+		if (!$id_bap) {
+			header('HTTP/1.0 400 ' . $this->app->getLastError());
+			die();
+		}
+
+		// return something?
+		echo json_encode([
+			'id'	=> $id_bap
+		]);
+	}
+
 	// return query bap
 	function querybap() {
 		$param = [

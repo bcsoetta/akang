@@ -320,7 +320,7 @@ $(function() {
 		var frm = this;
 		var fd = new FormData(frm);
 
-		console.log(fd);
+		// console.log(fd);
 
 		var validated = $('select[name="gudang[]"]').val() !== null
 						&& $('input[name="dateend"]').val() != '';
@@ -343,7 +343,7 @@ $(function() {
 			contentType: false,
 
 			success: function(data, textStatus, xhr) {
-				console.log(data);
+				// console.log(data);
 
 				for (var i=0; i<data.length; i++) {
 					const d = data[i];
