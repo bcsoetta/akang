@@ -1,4 +1,6 @@
 <?php
+include_once 'printables/pdf_bap.php';
+
 class C_app extends Base_Controller{
 	public function __construct(){
 		parent::__construct();	//call parent's ctor
@@ -489,9 +491,38 @@ class C_app extends Base_Controller{
 		}
 
 		// return something?
+		header('Access-Control-Allow-Origin: *');
+		header('Content-Type: application/json');
+
 		echo json_encode([
 			'id'	=> $id_bap
 		]);
+	}
+
+	// cetak bap
+	function bappdf($id) {
+		$data	= $this->app->queryBapById($id);
+
+		if (!$data) {
+			header('HTTP/1.0 400 ' . $this->app->getLastError());
+			die();
+		}
+
+		// now spawn it?
+		$pdf = new BapPdf($data);
+
+		$pdf->Output('I', 'bap.pdf');
+	}
+
+	// return bap by id
+	function getbap($id) {
+		$bap= $this->app->queryBapById($id);
+
+		// print_r($bap);
+		header('Access-Control-Allow-Origin: *');
+		header('Content-Type: application/json');
+
+		echo json_encode($bap);
 	}
 
 	// return query bap

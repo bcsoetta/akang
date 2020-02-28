@@ -800,6 +800,83 @@ class app extends Base_Model {
 		return false;
 	}
 
+	// query bap by its id
+	function queryBapById($id) {
+		$qheader = "
+		SELECT
+			h.*,
+			DATE_FORMAT(h.tanggal, '%d-%m-%Y') tanggal_formatted,
+			pjt.fullname pjt,
+			pemeriksa.fullname nama_pemeriksa,
+			pemeriksa.nip nip_pemeriksa
+		FROM
+			bap_header h
+			JOIN
+			user pjt
+			ON
+				h.id_pjt = pjt.id
+			JOIN
+			user pemeriksa
+			ON
+				h.id_pemeriksa = pemeriksa.id
+		WHERE
+			h.id = :id;
+		";
+
+		$qdetail = "
+		SELECT
+			d.no_dok,
+			d.tgl_dok,
+			d.importir,
+			d.jml_item,
+			d.berat_kg,
+			CASE
+				WHEN s.`status` = 'FINISHED' THEN 'Sesuai LHP'
+				ELSE s.catatan
+			END keterangan
+		FROM
+			bap_detail bd
+			JOIN
+			batch_detail d
+			ON
+				d.id = bd.detail_id 
+			JOIN
+			status_dok s
+			ON
+				s.dok_id = d.id
+				AND
+				s.`status` IN ('FINISHED', 'INCONSISTENT')
+		WHERE
+			bd.bap_id = :id;
+		";
+
+		try {
+			$param	= [
+				'id'	=> $id
+			];
+
+			// 1st grab header
+			$stmtHeader = $this->db->prepare($qheader);
+			$stmtHeader->execute($param);
+
+			// 2nd grab detail
+			$stmtDetail	= $this->db->prepare($qdetail);
+			$stmtDetail->execute($param);
+
+			// grab data header
+			$rowheader	= $stmtHeader->fetchAll(PDO::FETCH_ASSOC);
+			$rowdetail	= $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
+
+			return array_merge($rowheader[0], [
+				'data'	=> $rowdetail
+			]);
+		} catch (\Exception $e) {
+			$this->setLastError($e->getMessage());
+
+			return false;
+		}
+	}
+
 	// this function queries already made bap
 	function queryBap($param) {
 		$tgl_bap = $param['tanggal'];
