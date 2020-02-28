@@ -34,6 +34,33 @@ class C_pemeriksa extends Base_Controller {
 		$this->load_view('index', $data);
 	}
 
+	// halaman untuk cetak bap
+	public function cetakbap() {
+		// gotta check user role + login state
+		$this->user->forceLogin();
+
+		if (!$this->user->hasRole(R_PEMERIKSA)) {
+			return forbid();
+		}
+
+		$data = array();
+		$data['pagetitle'] = $this->app->getTitle().' (Cetak BAP)';
+		$data['user'] = $this->user->getData();
+		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
+			$this->user->getData()['id'],
+			$this->user->getData()['role_code']
+			));
+
+		// Form cetak BAP?
+		$formCariBap = $this->load_view('browse_bap', [
+			'id_pemeriksa'	=> $this->user->getData()['id']
+		], true);
+
+		$data['mainContent']	= $formCariBap;
+		$this->load_view('index', $data);
+
+	}
+
 	// page ini merespon ajax request utk query data absen
 	public function statusabsen($tanggal, $bulan, $tahun) {
 		$this->user->forceLogin();
@@ -137,6 +164,11 @@ class C_pemeriksa extends Base_Controller {
 			'gudang' => $gudang,
 			'pemeriksa' => $data
 			));
+	}
+
+	// page ini ajax response buat ngeluarin bap
+	public function querynonbap() {
+		// 
 	}
 
 	// page ini ajax response buat simpan status penugasan pemeriksa

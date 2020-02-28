@@ -749,7 +749,7 @@ class app extends Base_Model {
 			return $retData;
 			
 		} catch (PDOException $e) {
-			$this->setLastError($e->getMessage());
+			$this->setLastError("PDO Error: ".$e->getMessage());
 
 			return false;
 		}		
@@ -788,16 +788,257 @@ class app extends Base_Model {
 			return $retData;
 
 		} catch (PDOException $e) {
-			$this->setLastError($e->getMessage());
+			$this->setLastError("PDO Error: " . $e->getMessage());
 
 			return false;
 		} catch (Exception $e) {
-			$this->setLastError($e->getMessage());
+			$this->setLastError("Common error: " . $e->getMessage());
 
 			return false;
 		}
 
 		return false;
+	}
+
+	// this function queries already made bap
+	function queryBap($param) {
+		$tgl_bap = $param['tanggal'];
+		$id_pemeriksa = $param['pemeriksaid'];
+		$keyword = $param['keyword'];
+
+		$qstring = "
+		SELECT
+			h.id,
+			h.nomor,
+			h.tanggal,
+			DATE_FORMAT(h.tanggal, '%d/%m/%Y') tanggal_formatted,
+			h.nomor_lengkap,
+			h.gudang,
+			pjt.fullname pjt,
+			pemeriksa.fullname,
+			pemeriksa.nip,
+			(
+			SELECT COUNT(*) FROM bap_detail WHERE bap_id = h.id
+			) total_hawb
+		FROM
+			bap_header h
+			JOIN
+			user pjt
+			ON
+				h.id_pjt = pjt.id
+			JOIN
+			user pemeriksa
+			ON
+				h.id_pemeriksa = pemeriksa.id
+		WHERE
+			1
+		";
+
+		$qtail ="
+			AND
+			h.id_pemeriksa = :pemeriksaid
+			AND
+			h.tanggal = STR_TO_DATE(:tanggal, '%d/%m/%Y')
+			AND
+			(
+			h.gudang LIKE '%{$keyword}%'
+			OR
+			pjt.fullname LIKE '%{$keyword}%'
+			)
+		ORDER BY
+			h.created_at DESC
+		";
+
+		$q_limit = "LIMIT
+		:startid, :itemperpage";
+
+		$q_total_body = "
+			SELECT 
+				COUNT(*) total
+			FROM
+				bap_header h
+				JOIN
+				user pjt
+				ON
+					h.id_pjt = pjt.id
+				JOIN
+				user pemeriksa
+				ON
+					h.id_pemeriksa = pemeriksa.id
+			WHERE 1
+		";
+
+		try {
+			// return data
+			$retData = array(
+				'pageid' => $param['pageid'],
+				'itemperpage' => $param['itemperpage'],
+				'totaldata' => 0,	// calculate later
+				'totalpage' => 0,	// calculate later
+				'data'	=> null
+				);
+
+			// query data
+			$execData = [
+				'pemeriksaid'	=> $id_pemeriksa,
+				'tanggal'		=> $tgl_bap
+			];
+
+			// query total first
+			$stmt_total = $this->db->prepare($q_total_body . $qtail );
+			$res_total = $stmt_total->execute($execData);
+
+			if (!$res_total) {
+				throw new PDOException("Failed to query total BAP");
+			}
+
+			// everything's fine, grab it
+			$data = $stmt_total->fetchAll(PDO::FETCH_ASSOC);
+
+			if (!count($data)) {
+				throw new PDOException("Total query result in empty data...weird. ");
+			}
+
+			$total = $data[0]['total'];
+
+			$retData['totaldata'] = $total;
+			$retData['totalpage'] = ceil($total/$retData['itemperpage']);
+
+			// correct the shit (user might navigate too far, e.g. Page ID is out of boundary)
+			if ($retData['totalpage'] > 0) {
+				if ($param['pageid'] < 1)
+					$param['pageid'] = 1;
+
+				if ($param['pageid'] > $retData['totalpage'])
+					$param['pageid'] = $retData['totalpage'];
+
+				$retData['pageid'] = $param['pageid'];
+
+				// correct parameter
+				$param['itemperpage'] = max(1, $param['itemperpage']);
+				$qparam['startid'] = max( array( ($param['pageid']-1) * $param['itemperpage'], 0 ) );
+			} else 
+				return null;	// no data
+
+			// query real data
+			$execData['startid'] =  max( array( ($param['pageid']-1) * $param['itemperpage'], 0 ) );
+			$execData['itemperpage'] = $param['itemperpage'];
+
+			$stmt = $this->db->prepare($qstring . $qtail . $q_limit);
+			$res = $stmt->execute($execData);
+
+			if (!$res) {
+				throw new PDOException("Failed to query real BAP");
+			}
+
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			if (!count($data))
+				return null;
+
+			$retData['data']	= $data;
+
+			// append something?
+			foreach ($retData['data'] as &$row) {
+				$row['url'] = base_url('app/bappdf/' . $row['id']);
+			}
+
+			return $retData;
+		} catch (\Exception $e) {
+			$this->setLastError($e->getMessage());
+			return false;
+		}
+	}
+
+	// this function queries what just finished inspection but not bap-ed yet
+	function queryFinishedNotBaped($id_pemeriksa, $gudang) {
+		// make it an array?
+		$arr_id_pemeriksa 	= is_array($id_pemeriksa) ? $id_pemeriksa : [ $id_pemeriksa ];
+		$arr_gudang		= is_array($gudang) ? $gudang : [ $gudang ];
+
+		$list_id_pemeriksa	= implode(",", $arr_id_pemeriksa);
+		$list_gudang		= implode(",", array_map(function ($e) {
+			return "'{$e}'";
+		}, $arr_gudang));
+
+		// qstring
+		$qstring=
+		"
+		SELECT
+		-- s.*,
+		-- DATE(s.time) tgl_selesai,
+		-- h.gudang,
+		-- pjt.id pjt_id,
+		-- 	pjt.fullname pjt_fullname
+			pjt.id pjt_id,
+			pjt.fullname,
+			s.user_id pemeriksa_id,
+			h.gudang,
+			DATE(s.time) tanggal,
+			DATE_FORMAT(s.time, '%d/%m/%Y') tanggal_formatted,
+			COUNT(*) total
+		FROM
+			status_dok s
+			JOIN
+			batch_detail d
+			ON
+				s.dok_id = d.id
+			JOIN
+			batch_header h
+			ON
+				d.batch_id = h.id
+			JOIN
+			user pjt
+			ON
+				h.uploader_id = pjt.id
+			LEFT JOIN
+			bap_detail pd
+			ON
+				pd.detail_id = d.id
+		WHERE
+			DATE(s.time) = '2020-02-28'
+			AND
+			s.`status` IN ('FINISHED', 'INCONSISTENT')
+			AND 
+			s.user_id IN ({$list_id_pemeriksa})
+			AND
+			h.gudang IN ({$list_gudang})
+			AND
+			pd.id IS NULL
+		GROUP BY
+			pjt.id,
+			h.gudang
+		";
+
+
+		// make it
+		$this->db->beginTransaction();
+
+		try {
+			//code...
+			$stmt 	= $this->db->prepare($qstring);
+			$res	= $stmt->execute();
+
+			if (!$res) {
+				throw new \Exception("Query finished inspection failed");
+			}
+
+			// fetch all
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			// commit
+			$this->db->commit();
+
+			// return result
+			return $data;
+		} catch (\Exception $e) {
+			//throw $th;
+			$this->db->rollback();
+
+			$this->setLastError($e->getMessage());
+
+			return false;
+		}
 	}
 
 	// this function queries the statistics for each warehouse

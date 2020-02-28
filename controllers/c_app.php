@@ -444,9 +444,57 @@ class C_app extends Base_Controller{
 			return $this->queryactivewarehouse();
 		} else if ($data == 'awb') {
 			return $this->queryawb();
+		} else if ($data == 'bap') {
+			return $this->querybap();
+		} else if ($data == 'finished') {
+			return $this->queryfinished();
 		}
 
 		return forbid();
+	}
+
+	// return finished not bap
+	function queryfinished() {
+		// $id_pemeriksa	= $this->user->getData()['id'];
+		// $gudang			= $_POST['gudang'];
+
+		$id_pemeriksa	= 39;
+		$gudang			= ['GBGD', 'GJDC', 'GIBS', 'KBPI'];
+
+		$data = $this->app->queryFinishedNotBaped($id_pemeriksa, $gudang);
+
+		if (!$data) {
+			header('HTTP/1.0 400 ' . $this->app->getLastError());
+			die();
+		}
+
+		header('Access-Control-Allow-Origin: *');
+		header('Content-Type: application/json');
+
+		echo json_encode($data);
+	}
+
+	// return query bap
+	function querybap() {
+		$param = [
+			'tanggal'	=> $_POST['tanggal'] ?? null,
+			'keyword'	=> $_POST['keyword'] ?? '',
+			'pageid'	=> $_POST['pageid'] ?? 1,
+			'itemperpage'	=> $_POST['itemperpage'] ?? 10,
+			'pemeriksaid'	=> $_POST['pemeriksaid'] ?? null
+		];
+
+		$data =  $this->app->queryBap($param);
+
+		if (!$data) {
+			header('HTTP/1.0 400 ' . $this->app->getLastError());
+			die();
+		}
+
+		header('Access-Control-Allow-Origin: *');
+		header('Content-Type: application/json');
+
+		echo json_encode($data);
 	}
 
 	// return data queried by awb

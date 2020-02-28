@@ -153,6 +153,11 @@ class menu extends Base_Model {
 			// $mn_periksa_cnpibk = $this->addMenuItem('List CN/PIBK', $mn_pemeriksa, null, 'app/listcnpibk');
 
 				$mn_list_dok = $this->addMenuItem('List Barang Siap Periksa', $mn_pemeriksa, null, 'pemeriksa/listbarang');
+
+				// for pure pemeriksa only
+				if ($role == R_PEMERIKSA) {
+					$mn_cetak_bap	= $this->addMenuItem('Cetak Berita Acara Pemeriksaan', $mn_pemeriksa, null, 'pemeriksa/cetakbap');
+				}
 		}
 
 		// menu admin pabean

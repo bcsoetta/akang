@@ -3,42 +3,23 @@ if (!isset($datestart))
 	$datestart = date('d/m/Y');
 if (!isset($dateend))
 	$dateend = date('d/m/Y');
+if (!isset($id_pemeriksa))
+	$id_pemeriksa = 0;
 ?>
 <div id="toolbox">
-	<form action="<?php echo base_url('app/query/request');?>" id="parambox">
+	<form action="<?php echo base_url('app/query/bap');?>" id="parambox">
 		<p>
-			<span class="field">Tanggal Permohonan</span>
-			<input id="datestart" class="datepicker shAnim shInput" name="datestart" value="<?php echo $datestart;?>" type="text" />
-			<span>s/d&nbsp;</span>
-			<input id="dateend" class="datepicker shAnim shInput" name="dateend" value="<?php echo $datestart;?>" type="text" />
-			<select class="styled shAnim" name="paramtype">
-				<option value="batchid" selected>No. Batch</option>
-				<option value="lokasi">Lokasi Barang</option>
+			<span class="field">Tanggal BAP</span>
+			<input id="datestart" class="datepicker shAnim shInput" name="tanggal" value="<?php echo $datestart;?>" type="text" />
+			
+			<span class="field">Keyword</span>
 
-				<?php
-				if (isset($adminMode)) {
-				?>
-				
-				<option value="uploader">Uploader</option>
-				
-				<?php
-				}
-				?>
-			</select>
-
-			<input class="shAnim si2 tooltip" name="paramvalue" value="" type="text" />
-
-			<span class="field">Jenis Pengajuan</span>
-			<select class="styled shAnim" name="doctype">
-				<option value="ALL" selected>Semua</option>
-				<option value="PIB">PIB</option>
-				<option value="CN_PIBK">CN/PIBK</option>
-				<option value="CARNET">CARNET</option>
-			</select>
+			<input class="shAnim si2 tooltip" name="keyword" value="" type="text" />
 
 			<input class="commonButton blueGrad shAnim" name="submit" value="Cari" type="submit" />
 			<input class="commonButton redGrad shAnim" value="Kosongkan" type="reset" />
 			<input type="hidden" name="pageid" value="1" />
+			<input type="hidden" name="pemeriksaid" value="<?php echo $id_pemeriksa;?>" />
 		</p>
 
 		<p class="right" style="margin: 12px auto;">
@@ -47,23 +28,29 @@ if (!isset($dateend))
 				<option value="5" selected>5 Item</option>
 				<option value="10" selected>10 Item</option>
 				<option value="25">25 Item</option>
-				<option value="25">50 Item</option>
-				<option value="25">100 Item</option>
+				<option value="50">50 Item</option>
+				<option value="100">100 Item</option>
 			</select>
 		</p>
 	</form>
+</div>
+<div>
+	<button 
+		class="commonButton blueGrad shAnim" 
+		id="btn-dlg-bap"
+		style="display: inline-block;">Rekam BAP</button>
 </div>
 <div>
 	<table class="table" id="tblBatch">
 		<thead>
 			<tr>
 				<th>No.</th>
-				<th>Batch #</th>
-				<th>Jenis Dok</th>
-				<th>Waktu Upload</th>
-				<th>Uploader</th>
+				<th>Nomor BAP</th>
+				<th>Tanggal BAP</th>
+				<th>PJT</th>
+				<th>Total HAWB diperiksa</th>
 				<th>Lokasi</th>
-				<th>Penyelesaian</th>
+				<th>Action</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -88,13 +75,20 @@ if (!isset($dateend))
 <div id="blocker">
 	<div class="dialog">
 		<h2 id="blockerText">
-		Parsing Data...
+		Loading Data...
 		</h2>
 		<div id="spinnerBox">
 			<div class="spinner">
 			</div>
 		</div>
-	</p>
+	</div>
+</div>
+
+
+<div class="floatForm" id="dlg-bap">
+	<h2>
+	Rekam Berita Acara Pemeriksaan
+	</h2>
 </div>
 
 <script type="text/javascript">
@@ -121,28 +115,25 @@ function clearTable() {
 	$('#tblBatch tbody tr').remove();
 }
 
-function addRow(batchid, doctype, upload_time, uploader, lokasi, url, selesai, totalDok) {
+function addRow(bap_no, tgl_formatted, pjt, total_hawb, lokasi, url) {
 	var rowCount = $('#tblBatch tbody tr').length;
 
 	var row = '<tr>';
 
 	// nomor
 	row += '<td class="rowNum">' + (pagingData.startNumber+rowCount+1) + '</td>';
-	// batch number
-	row += '<td><a class="ifullblock" target="_blank" href="' + url + '" >' + batchid + '</a></td>';
-	// jenis dok
-	row += '<td>' + doctype + '</td>';
+	// bap number
+	row += '<td>' + bap_no + '</a></td>';
+	// tgl dok
+	row += '<td>' + tgl_formatted + '</td>';
 	// waktu upload
-	row += '<td>' + upload_time + '</td>';
+	row += '<td>' + pjt + '</td>';
 	// uploader
-	row += '<td>' + uploader + '</td>';
+	row += '<td>' + total_hawb + '</td>';
 	// lokasi
 	row += '<td>' + lokasi + '</td>';
 
-	// selesai
-	var complete = (selesai / totalDok * 100.0).toFixed(2);
-
-	row += '<td>' + selesai + '/' + totalDok + ' ('+complete + ' %' + ')' + '</td>';
+	row += `<td><div><a href="${url}" target="_blank" style="display: inline-block; margin: 0.2em;" class="commonButton blueGrad shAnim">Cetak</a></div></td>`;
 
 	row += '</tr>';
 
@@ -258,14 +249,12 @@ $(function() {
 					for (var i=0; i<data.data.length; i++) {
 						// batchid, upload_time, uploader, lokasi, url
 						addRow(
-							data.data[i].id,
-							data.data[i].jenis_dok,
-							data.data[i].time_formatted,
-							data.data[i].fullname,
+							data.data[i].nomor_lengkap,
+							data.data[i].tanggal_formatted,
+							data.data[i].pjt,
+							data.data[i].total_hawb,
 							data.data[i].gudang,
-							data.data[i].url,
-							data.data[i].total_finished,
-							data.data[i].total_dok
+							data.data[i].url
 							);
 					}
 					setPagingBox(data.pageid, data.totalpage, data.totaldata);
@@ -280,7 +269,7 @@ $(function() {
 				hideBlocker();
 			},
 			error: function(jqXHR, status, errorObj) {
-				alert("Data BAP tidak ditemukan");
+				alert("Error("+jqXHR.status+"):\n"+jqXHR.statusText);
 				console.log(jqXHR);
 				console.log(jqXHR.responseText);
 				// hide blocker
@@ -294,6 +283,11 @@ $(function() {
 	// behavior utk combo box jumlah item yang ditampilkan
 	$('#itemPerPage').change(function() {
 		$('#parambox').submit();
+	});
+
+
+	$('#btn-dlg-bap').click(function (e) {
+		$('#dlg-bap').toggle(200);
 	});
 });
 </script>
