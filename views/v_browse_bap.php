@@ -5,6 +5,8 @@ if (!isset($dateend))
 	$dateend = date('d/m/Y');
 if (!isset($id_pemeriksa))
 	$id_pemeriksa = 0;
+
+$listGudang = $listGudang ?? ['GJDC','GIBS'];
 ?>
 <div id="toolbox">
 	<form action="<?php echo base_url('app/query/bap');?>" id="parambox">
@@ -89,6 +91,70 @@ if (!isset($id_pemeriksa))
 	<h2>
 	Rekam Berita Acara Pemeriksaan
 	</h2>
+
+	
+
+	<form id="frmBrowseFinished" action="<?php echo base_url('app/query/finished');?>">
+
+	<p>
+		<span>Tanggal BAP</span>
+		<input id="dateend" class="datepicker shAnim shInput" name="tanggal" value="<?php echo $datestart;?>" type="text" />
+	</p>
+
+	<p>
+		<span>Gudang</span>
+
+		<select id="gudang" name="gudang[]" multiple>
+		
+
+		<?php
+		foreach ($listGudang as $gudang) {
+		?>
+
+		<option value="<?php echo $gudang;?>"><?php echo $gudang;?></option>
+
+		<?php
+		}
+		?>
+
+		</select>
+	</p>
+	
+	
+
+	<p>
+	<input type="hidden" name="pemeriksaid" value="<?php echo $id_pemeriksa;?>" />
+	<input type="submit" class="commonButton blueGrad shAnim" value="Cari"/>
+	</p>
+
+	</form>
+
+	<hr>
+
+	<div style="overflow-y: auto; height: 175px;">
+		<table class="table" id="tblFinished">
+			<thead>
+				<tr>
+					<th>No.</th>
+					<th>PJT</th>
+					<th>GUDANG</th>
+					<th>Total HAWB</th>	
+					<th></th>	
+				</tr>
+			</thead>
+
+			<tbody>
+				
+			</tbody>
+		</table>
+	</div>
+
+	<!-- <hr> -->
+	<p style="text-align: right; margin-top: 0.75em;">
+		<!-- <button type="submit" class="commonButton redGrad shAnim" id="btnKirimPemeriksa">Kirim</button> -->
+		<button type="button" class="commonButton redGrad shAnim btnFloatClose" id="btnCloseForm">Tutup</button>
+	</p>
+
 </div>
 
 <script type="text/javascript">
@@ -113,6 +179,27 @@ function hideBlocker() {
 
 function clearTable() {
 	$('#tblBatch tbody tr').remove();
+}
+
+function clearFinishedTable() {
+	$('#tblFinished tbody tr').remove();
+}
+
+function addRowTblFinished(pjt, gudang, total_hawb, url) {
+	var rowCount = $('#tblFinished tbody tr').length;
+
+	var row = 
+	`<tr>
+		<td class="rowNum">${rowCount+1}</td>
+		<td>${pjt}</td>
+		<td>${gudang}</td>
+		<td>${total_hawb}</td>
+		<td>
+			<button class="commonButton blueGrad shAnim btnRekamBap" data-url="${url}">Rekam</button>
+		</td>
+	</tr>`;
+
+	$('#tblFinished tbody').append(row);
 }
 
 function addRow(bap_no, tgl_formatted, pjt, total_hawb, lokasi, url) {
@@ -180,6 +267,18 @@ function navigate(pageid, totalpage) {
 
 // setting behavior di sini
 $(function() {
+	// multiselect
+	$('select#gudang').multiselect({
+		columns : 4,
+		search : true,
+		selectAll : true,
+		texts : {
+			placeholder: 'Pilih gudang',
+			search : 'Ketik gudang yang dicari'
+		}
+	});
+
+
 	// buat pas user awal2
 	hidePagingBox();
 
@@ -211,6 +310,55 @@ $(function() {
 
 			navigate(pageNum, pagingData.lastData.totalpage);
 		}
+	});
+
+	// behavior utk form cari finished
+	$('#frmBrowseFinished').submit(function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		var frm = this;
+		var fd = new FormData(frm);
+
+		console.log(fd);
+
+		var validated = $('select[name="gudang[]"]').val() !== null
+						&& $('input[name="dateend"]').val() != '';
+
+		if (!validated) {
+			alert("Parameter pencarian tidak lengkap!");
+			return false;
+		}
+
+		showBlocker("Cari CN yang belum di BAP...");
+
+		clearFinishedTable();
+
+		$.ajax({
+			url: frm.action,
+			type: 'POST',
+			data: fd,
+			cache: false,
+			processData: false,
+			contentType: false,
+
+			success: function(data, textStatus, xhr) {
+				console.log(data);
+
+				for (var i=0; i<data.length; i++) {
+					const d = data[i];
+
+					addRowTblFinished(d.fullname, d.gudang, d.total, d.url);
+				}
+
+				hideBlocker();
+			},
+
+			error: function(xhr, textStatus, error) {
+				alert(error);
+				hideBlocker();
+			}
+		});
 	});
 
 	// behavior utk form pencarian
@@ -287,7 +435,40 @@ $(function() {
 
 
 	$('#btn-dlg-bap').click(function (e) {
-		$('#dlg-bap').toggle(200);
+		$('#dlg-bap').show(200);
+	});
+
+	$('#btnCloseForm').click(function (e) {
+		$('#dlg-bap').hide(200);
+	});
+
+	// utk tombol rekam bap
+	$('body').on('click', '.btnRekamBap', function (e) {
+		// alert(this);
+		const url = $(this).data('url');
+		// alert(url);
+		showBlocker("Merekam BAP...");
+		/* setTimeout(() => {
+			hideBlocker();
+			clearFinishedTable();
+			$('#dlg-bap').hide(200);
+		}, 2000); */
+		$.get(url, (data, textStatus, xhr) => {
+			
+		})
+		.done(() => {
+			// clearFinishedTable();
+			$('form#frmBrowseFinished').submit();
+			$('#dlg-bap').hide(200);
+		})
+		.fail(() => {
+			alert("Gagal rekam BAP");
+			// $('#dlg-bap').hide(200);
+		})
+		.always(() => {
+			hideBlocker();
+			$('form#parambox').submit();
+		});
 	});
 });
 </script>

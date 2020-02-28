@@ -458,13 +458,18 @@ class C_app extends Base_Controller{
 		// $id_pemeriksa	= $this->user->getData()['id'];
 		// $gudang			= $_POST['gudang'];
 
-		$id_pemeriksa	= 39;
-		$gudang			= ['GBGD', 'GJDC', 'GIBS', 'KBPI'];
+		$id_pemeriksa	= $_POST['pemeriksaid']; //39;
+		$gudang			= $_POST['gudang'];//['GBGD', 'GJDC', 'GIBS', 'KBPI'];
+		$tanggal		= $_POST['tanggal'];
 
-		$data = $this->app->queryFinishedNotBaped($id_pemeriksa, $gudang);
+		$data = $this->app->queryFinishedNotBaped($id_pemeriksa, $gudang, $tanggal);
+		/* $data = [
+			'pemeriksaid'	=> $id_pemeriksa,
+			'gudang'		=> $gudang
+		]; */
 
 		if (!$data) {
-			header('HTTP/1.0 400 ' . $this->app->getLastError());
+			header('HTTP/1.0 404 ' . $this->app->getLastError());
 			die();
 		}
 

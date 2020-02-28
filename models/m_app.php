@@ -951,7 +951,7 @@ class app extends Base_Model {
 	}
 
 	// this function queries what just finished inspection but not bap-ed yet
-	function queryFinishedNotBaped($id_pemeriksa, $gudang) {
+	function queryFinishedNotBaped($id_pemeriksa, $gudang, $tanggal) {
 		// make it an array?
 		$arr_id_pemeriksa 	= is_array($id_pemeriksa) ? $id_pemeriksa : [ $id_pemeriksa ];
 		$arr_gudang		= is_array($gudang) ? $gudang : [ $gudang ];
@@ -974,8 +974,9 @@ class app extends Base_Model {
 			pjt.fullname,
 			s.user_id pemeriksa_id,
 			h.gudang,
-			DATE(s.time) tanggal,
-			DATE_FORMAT(s.time, '%d/%m/%Y') tanggal_formatted,
+		--	DATE(s.time) tanggal,
+			STR_TO_DATE(:tanggal2, '%d/%m/%Y') tanggal,
+			:tanggal3 tanggal_formatted,
 			COUNT(*) total
 		FROM
 			status_dok s
@@ -996,7 +997,7 @@ class app extends Base_Model {
 			ON
 				pd.detail_id = d.id
 		WHERE
-			DATE(s.time) = '2020-02-28'
+			DATE(s.time) = STR_TO_DATE(:tanggal, '%d/%m/%Y')
 			AND
 			s.`status` IN ('FINISHED', 'INCONSISTENT')
 			AND 
@@ -1017,7 +1018,11 @@ class app extends Base_Model {
 		try {
 			//code...
 			$stmt 	= $this->db->prepare($qstring);
-			$res	= $stmt->execute();
+			$res	= $stmt->execute([
+				'tanggal'	=> $tanggal,
+				'tanggal2'	=> $tanggal,
+				'tanggal3'	=> $tanggal
+			]);
 
 			if (!$res) {
 				throw new \Exception("Query finished inspection failed");
@@ -1030,7 +1035,11 @@ class app extends Base_Model {
 			$this->db->commit();
 
 			// return result
-			return $data;
+			return array_map(function ($e) use ($id_pemeriksa) {
+				return array_merge($e, [
+					'url'	=> base_url("app/createbap/{$e['gudang']}/{$e['pjt_id']}/{$id_pemeriksa}/{$e['tanggal']}")
+				]);
+			}, $data);
 		} catch (\Exception $e) {
 			//throw $th;
 			$this->db->rollback();

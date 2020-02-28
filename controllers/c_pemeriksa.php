@@ -52,8 +52,11 @@ class C_pemeriksa extends Base_Controller {
 			));
 
 		// Form cetak BAP?
+		$uid = $this->user->getData()['id'];
+
 		$formCariBap = $this->load_view('browse_bap', [
-			'id_pemeriksa'	=> $this->user->getData()['id']
+			'id_pemeriksa'	=> $uid,
+			'listGudang'	=> $this->user->getAssignedLocation($uid)
 		], true);
 
 		$data['mainContent']	= $formCariBap;
