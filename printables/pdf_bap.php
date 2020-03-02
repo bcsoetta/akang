@@ -167,7 +167,7 @@ class BapPdf extends FPDF {
             $p->Rect($currX + 130, $currY, 40, $h); // keterangan
 
             // if we reach end of page, start anew with header
-            if ($endY >= 270) {
+            if ($endY >= 240) {
                 $p->AddPage();
                 $this->tableHeader();
                 // $p->Ln();   
