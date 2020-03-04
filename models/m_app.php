@@ -825,6 +825,7 @@ class app extends Base_Model {
 
 		$qdetail = "
 		SELECT
+			DISTINCT(bd.detail_id),
 			d.no_dok,
 			d.tgl_dok,
 			d.importir,
@@ -895,7 +896,7 @@ class app extends Base_Model {
 			pemeriksa.fullname,
 			pemeriksa.nip,
 			(
-			SELECT COUNT(*) FROM bap_detail WHERE bap_id = h.id
+			SELECT COUNT(DISTINCT(detail_id)) FROM bap_detail WHERE bap_id = h.id
 			) total_hawb
 		FROM
 			bap_header h
