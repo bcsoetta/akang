@@ -645,7 +645,7 @@ class C_pemeriksa extends Base_Controller {
 		else
 			$searchParam['doctype'] = array();
 
-		$searchParam['listPemeriksa'] = $this->pemeriksa->getListPemeriksa();
+		$searchParam['listPemeriksa'] = $this->pemeriksa->getListPemeriksa(true);
 
 
 		// data utk browse
