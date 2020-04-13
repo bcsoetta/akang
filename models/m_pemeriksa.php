@@ -733,7 +733,7 @@ class pemeriksa extends Base_Model {
 			";
 		
 		// SPECIAL CASE FOR OVERTIME BIIIIITCH!!!
-		$dayDiffAllowed = 5;
+		$dayDiffAllowed = 25;
 		
 		if ($status == 'OVERTIME') {
 			$qstring .= " AND TIMESTAMPDIFF(DAY, a.time, NOW()) <= $dayDiffAllowed";

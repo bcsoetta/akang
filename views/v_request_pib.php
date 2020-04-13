@@ -401,7 +401,7 @@ $docTypeName = $docType == 'CN_PIBK' ? 'CN/PIBK' : 'CARNET';
 						for (var i=0; i<data.length; i++) {
 							// console.log(data[i].no_pib + " :: " + data[i].tgl_pib);
 
-							addNewRow(data[i].no_dok, data[i].tgl_dok, data[i].importir, data[i].jml_item, data[i].berat_kg);
+							addNewRow(data[i].no_dok, data[i].tgl_dok, data[i].importir, data[i].koli, data[i].berat_kg);
 						}
 
 						// update the number manually?
