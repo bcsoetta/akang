@@ -169,6 +169,8 @@ class menu extends Base_Model {
 			$mn_update_pemeriksa = $this->addMenuItem('Status Pemeriksa', $mn_admin_pabean, null, 'pemeriksa/status');
 			// $mn_laporan = $this->addMenuItem('Laporan Kegiatan', $mn_admin_pabean, null, 'app/report');
 			$mn_performa_pemeriksa = $this->addMenuItem('Performa Pemeriksa', $mn_admin_pabean, null, 'pemeriksa/performa');
+
+			$mn_browse_bap_all = $this->addMenuItem('Browse BAP (All)', $mn_admin_pabean, null, '/pemeriksa/browsebap');
 		}
 
 		// menu superuser

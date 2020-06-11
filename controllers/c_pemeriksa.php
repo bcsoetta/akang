@@ -614,6 +614,69 @@ class C_pemeriksa extends Base_Controller {
 		
 	}
 
+	// untuk browse bap
+	public function browsebap() {
+		$this->user->forceLogin();
+
+		if (!$this->user->hasRole(R_ADMIN_PABEAN))
+			return forbid();
+		
+
+		// save param if ever saved
+		if (isset($_POST['datestart']))
+			$searchParam['datestart'] = trim(stripslashes($_POST['datestart']));		// tanggal mulai
+		else
+			$searchParam['datestart'] = date('d/m/Y');
+
+		if (isset($_POST['dateend']))
+			$searchParam['dateend'] = trim(stripslashes($_POST['dateend']));			// tanggal selesai
+		else
+			$searchParam['dateend'] = date('d/m/Y');
+
+		if (isset($_POST['selectedPemeriksa']))
+			$searchParam['selectedPemeriksa'] = $_POST['selectedPemeriksa'];			// pemeriksa yang dipilih (list ID)
+		else
+			$searchParam['selectedPemeriksa'] = array();
+
+		if (isset($_POST['doctype']))
+			$searchParam['doctype'] = $_POST['doctype'];								// jenis dokumen yang dicari
+		else
+			$searchParam['doctype'] = array();
+
+		$searchParam['listPemeriksa'] = $this->pemeriksa->getListPemeriksa(true);
+
+
+		// data utk browse
+		// 1. list pemeriksa
+		// 2. range tanggal utk cek performa
+		// 3. detil dokumen apa aja yg diperiksa? (JENIS, Jumlah, etc)
+		$performData = array();
+
+		$performData['searchParam'] = $searchParam;
+
+		$performData['searchResult'] = $this->app->queryBapByQuery(
+			$searchParam['datestart'],
+			$searchParam['dateend'],
+			$searchParam['selectedPemeriksa']
+		); /* $this->pemeriksa->queryPerforma(
+			$searchParam['datestart'],
+			$searchParam['dateend'],
+			$searchParam['selectedPemeriksa']
+		); */
+
+		// data utk halaman utama
+		$data = array();
+		$data['pagetitle'] = $this->app->getTitle().' (Browse Semua BAP Pemeriksa)';
+		$data['user'] = $this->user->getData();
+		$data['menu'] = $this->menu->generateHTML($this->menu->generateMenuScheme(
+			$this->user->getData()['id'],
+			$this->user->getData()['role_code']
+			));
+
+		$data['mainContent'] = $this->load_view('browse_bap_all', $performData, true);
+		$this->load_view('index', $data);
+	}
+
 	// untuk melihat performa pemeriksa
 	public function performa() {
 		$this->user->forceLogin();

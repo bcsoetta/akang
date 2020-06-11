@@ -878,6 +878,149 @@ class app extends Base_Model {
 		}
 	}
 
+	// query semua
+	function queryBapByQuery($from, $to, $listPemeriksa) {
+		$result = [];
+		if (!isset($listPemeriksa) || !is_array($listPemeriksa) || !isset($from) || !isset($to) ) {
+			return $result;
+		}
+
+		// flatten em
+		$list_id_pemeriksa = implode(",", $listPemeriksa);
+
+		$qstring = "
+		SELECT
+			h.id,
+			h.nomor,
+			h.tanggal,
+			DATE_FORMAT(h.tanggal, '%d/%m/%Y') tanggal_formatted,
+			h.nomor_lengkap,
+			h.gudang,
+			pjt.fullname pjt,
+			pemeriksa.fullname,
+			pemeriksa.nip,
+			(
+			SELECT COUNT(DISTINCT(detail_id)) FROM bap_detail WHERE bap_id = h.id
+			) total_hawb
+		FROM
+			bap_header h
+			JOIN
+			user pjt
+			ON
+				h.id_pjt = pjt.id
+			JOIN
+			user pemeriksa
+			ON
+				h.id_pemeriksa = pemeriksa.id
+		WHERE
+			1
+		";
+
+		$qtail ="
+			AND
+			h.id_pemeriksa IN ({$list_id_pemeriksa})
+			AND
+			h.tanggal BETWEEN STR_TO_DATE(:tanggalAwal, '%d/%m/%Y') AND STR_TO_DATE(:tanggalAkhir, '%d/%m/%Y')
+		ORDER BY
+			h.created_at DESC
+		";
+
+		/* $q_limit = "LIMIT
+		:startid, :itemperpage"; */
+
+		$q_total_body = "
+			SELECT 
+				COUNT(*) total
+			FROM
+				bap_header h
+				JOIN
+				user pjt
+				ON
+					h.id_pjt = pjt.id
+				JOIN
+				user pemeriksa
+				ON
+					h.id_pemeriksa = pemeriksa.id
+			WHERE 1
+		";
+
+		try {
+			// return data
+			$retData = array(
+				'pageid' => 0,
+				'itemperpage' => 0,
+				'totaldata' => 0,	// calculate later
+				'totalpage' => 0,	// calculate later
+				'data'	=> null
+				);
+
+			// query data
+			$execData = [
+				'tanggalAwal'		=> $from,
+				'tanggalAkhir'		=> $to
+			];
+
+			// query total first
+			/* $stmt_total = $this->db->prepare($q_total_body . $qtail );
+			$res_total = $stmt_total->execute($execData);
+
+			if (!$res_total) {
+				throw new PDOException("Failed to query total BAP");
+			}
+
+			// everything's fine, grab it
+			$data = $stmt_total->fetchAll(PDO::FETCH_ASSOC);
+
+			if (!count($data)) {
+				throw new PDOException("Total query result in empty data...weird. ");
+			}
+
+			$total = $data[0]['total'];
+
+			$retData['totaldata'] = $total;
+			$retData['totalpage'] = ceil($total/$retData['itemperpage']); */
+
+			// correct the shit (user might navigate too far, e.g. Page ID is out of boundary)
+			/* if ($retData['totalpage'] > 0) {
+				if ($pageid < 1)
+					$pageid = 1;
+
+				if ($pageid > $retData['totalpage'])
+					$pageid = $retData['totalpage'];
+
+				$retData['pageid'] = $pageid;
+
+				// correct parameter
+				$param['itemperpage'] = max(1, $itemPerPage);
+				$qparam['startid'] = max( array( ($param['pageid']-1) * $itemPerPage, 0 ) );
+			} else 
+				return null;	// no data */
+
+			// query real data
+			/* $execData['startid'] =  max( array( ($pageid-1) * $itemPerPage, 0 ) );
+			$execData['itemperpage'] = $itemPerPage; */
+
+			$stmt = $this->db->prepare($qstring . $qtail /* . $q_limit */);
+			$res = $stmt->execute($execData);
+
+			if (!$res) {
+				throw new PDOException("Failed to query real BAP");
+			}
+
+			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			if (!count($data))
+				return null;
+
+			$retData['data']	= $data;
+
+			return $retData;
+		} catch (\Exception $e) {
+			$this->setLastError($e->getMessage());
+			return false;
+		}
+	}
+
 	// this function queries already made bap
 	function queryBap($param) {
 		$tgl_bap = $param['tanggal'];

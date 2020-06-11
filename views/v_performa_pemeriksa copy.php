@@ -1,7 +1,5 @@
 <div id="toolbox">
 	<form action="<?php echo base_url('pemeriksa/performa');?>" id="parambox" method="POST">
-		<p><strong>VIEW PERFORMA PEMERIKSA</strong></p>
-		<hr>
 		<p>
 			<span class="field">Dari</span>
 			<input id="datestart" class="datepicker shAnim shInput" name="datestart" type="text" value="<?php echo $searchParam['datestart'];?>"/>
